@@ -1,0 +1,826 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.hub { min-height: 100vh; background: var(--color-background-tertiary); }
+.topbar { background: var(--color-background-primary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.logo { font-size: 17px; font-weight: 500; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px; }
+.logo-dot { width: 10px; height: 10px; border-radius: 50%; background: #7F77DD; }
+.nav-tabs { display: flex; gap: 2px; }
+.tab { padding: 6px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; color: var(--color-text-secondary); border: none; background: transparent; transition: all 0.15s; }
+.tab:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+.tab.active { background: #EEEDFE; color: #534AB7; font-weight: 500; }
+.content { padding: 24px; }
+.tool-section { display: none; }
+.tool-section.active { display: block; }
+.section-title { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+.section-sub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 20px; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 20px; margin-bottom: 16px; }
+.card-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #EEEDFE; color: #534AB7; font-weight: 500; }
+.badge-green { background: #EAF3DE; color: #3B6D11; }
+.badge-amber { background: #FAEEDA; color: #854F0B; }
+label { font-size: 13px; color: var(--color-text-secondary); display: block; margin-bottom: 6px; margin-top: 14px; }
+input[type=text], input[type=email], textarea, select { width: 100%; padding: 8px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 14px; background: var(--color-background-primary); color: var(--color-text-primary); font-family: var(--font-sans); }
+textarea { resize: vertical; min-height: 80px; }
+.btn { padding: 8px 18px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-family: var(--font-sans); transition: all 0.15s; }
+.btn:hover { background: var(--color-background-secondary); }
+.btn-primary { background: #534AB7; color: #fff; border-color: #534AB7; }
+.btn-primary:hover { background: #3C3489; border-color: #3C3489; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.output-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 14px; font-size: 13px; color: var(--color-text-primary); min-height: 80px; line-height: 1.7; white-space: pre-wrap; }
+.row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.chip { padding: 4px 10px; border-radius: 20px; font-size: 12px; border: 0.5px solid var(--color-border-secondary); cursor: pointer; background: var(--color-background-primary); color: var(--color-text-secondary); transition: all 0.15s; }
+.chip.selected { background: #EEEDFE; border-color: #AFA9EC; color: #534AB7; }
+.divider { height: 0.5px; background: var(--color-border-tertiary); margin: 16px 0; }
+.stat-row { display: flex; gap: 12px; margin-bottom: 16px; }
+.stat { flex: 1; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.stat-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.stat-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.ig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; border-radius: var(--border-radius-md); overflow: hidden; }
+.ig-cell { aspect-ratio: 1; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; color: var(--color-text-tertiary); position: relative; transition: all 0.15s; overflow: hidden; }
+.ig-cell:hover { border-color: var(--color-border-primary); }
+.ig-cell .cell-num { position: absolute; top: 4px; left: 5px; font-size: 10px; color: var(--color-text-tertiary); }
+.ig-cell .cell-label { font-size: 11px; color: var(--color-text-secondary); text-align: center; padding: 4px; }
+.carousel-slide { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 20px; min-height: 180px; display: flex; align-items: center; justify-content: center; text-align: center; flex-direction: column; gap: 8px; }
+.carousel-nav { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 12px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-border-secondary); cursor: pointer; transition: all 0.15s; }
+.dot.active { background: #534AB7; }
+.email-block { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 16px; background: var(--color-background-primary); }
+.email-section { border: 0.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.15s; position: relative; }
+.email-section:hover { border-color: #AFA9EC; background: #EEEDFE20; }
+.email-section.selected { border-color: #534AB7; background: #EEEDFE; }
+.section-handle { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 6px; }
+.progress { height: 4px; background: var(--color-background-secondary); border-radius: 2px; overflow: hidden; margin: 8px 0; }
+.progress-fill { height: 100%; background: #7F77DD; border-radius: 2px; transition: width 0.3s; }
+.tool-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 16px; cursor: pointer; transition: all 0.15s; }
+.tool-card:hover { border-color: #AFA9EC; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.tool-card-icon { width: 36px; height: 36px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 10px; }
+.tool-card-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.tool-card-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #AFA9EC; border-top-color: #534AB7; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.video-timeline { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; margin-top: 12px; }
+.timeline-track { height: 36px; background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); margin-bottom: 6px; display: flex; overflow: hidden; position: relative; }
+.track-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 4px; }
+.track-clip { height: 100%; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-weight: 500; cursor: pointer; }
+.tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); }
+</style>
+
+<div class="hub">
+<div class="topbar">
+  <div class="logo"><div class="logo-dot"></div> CreatorHub</div>
+  <div class="nav-tabs" id="navTabs">
+    <button class="tab active" onclick="switchTab('home')">Home</button>
+    <button class="tab" onclick="switchTab('email')">Email Builder</button>
+    <button class="tab" onclick="switchTab('ig')">IG Planner</button>
+    <button class="tab" onclick="switchTab('carousel')">Carousel</button>
+    <button class="tab" onclick="switchTab('content')">Content Plan</button>
+    <button class="tab" onclick="switchTab('video')">Video Editor</button>
+    <button class="tab" onclick="switchTab('edu')">Education</button>
+    <button class="tab" onclick="switchTab('sales')">Sales Tools</button>
+    <button class="tab" onclick="switchTab('biz')">Business</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- HOME -->
+<div id="tab-home" class="tool-section active">
+  <div class="section-title">Welcome to CreatorHub</div>
+  <div class="section-sub">Every tool a creator needs — free, powerful, all in one place.</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Tools available</div><div class="stat-val">9</div></div>
+    <div class="stat"><div class="stat-label">AI-powered</div><div class="stat-val">100%</div></div>
+    <div class="stat"><div class="stat-label">Cost to use</div><div class="stat-val">$0</div></div>
+    <div class="stat"><div class="stat-label">Sign-up required</div><div class="stat-val">None</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+    <div class="tool-card" onclick="switchTab('email')"><div class="tool-card-icon" style="background:#EEEDFE;">✉️</div><div class="tool-card-name">Email Builder</div><div class="tool-card-desc">Drag-and-drop email campaigns with AI copy</div></div>
+    <div class="tool-card" onclick="switchTab('ig')"><div class="tool-card-icon" style="background:#FBEAF0;">📸</div><div class="tool-card-name">IG Grid Planner</div><div class="tool-card-desc">Visualize and plan your Instagram aesthetic</div></div>
+    <div class="tool-card" onclick="switchTab('carousel')"><div class="tool-card-icon" style="background:#E6F1FB;">🖼️</div><div class="tool-card-name">Carousel Builder</div><div class="tool-card-desc">Multi-slide carousels for any platform</div></div>
+    <div class="tool-card" onclick="switchTab('content')"><div class="tool-card-icon" style="background:#EAF3DE;">📅</div><div class="tool-card-name">Content Planner</div><div class="tool-card-desc">Schedule and plan your content calendar</div></div>
+    <div class="tool-card" onclick="switchTab('video')"><div class="tool-card-icon" style="background:#FAEEDA;">🎬</div><div class="tool-card-name">Video Editor</div><div class="tool-card-desc">Script, timeline, and edit planning tools</div></div>
+    <div class="tool-card" onclick="switchTab('edu')"><div class="tool-card-icon" style="background:#E1F5EE;">🎓</div><div class="tool-card-name">Education Tools</div><div class="tool-card-desc">Lesson plans, quizzes, and course outlines</div></div>
+    <div class="tool-card" onclick="switchTab('sales')"><div class="tool-card-icon" style="background:#FAECE7;">💰</div><div class="tool-card-name">Sales Tools</div><div class="tool-card-desc">Pitches, proposals, and funnel builders</div></div>
+    <div class="tool-card" onclick="switchTab('biz')"><div class="tool-card-icon" style="background:#F1EFE8;">🏢</div><div class="tool-card-name">Business Tools</div><div class="tool-card-desc">Invoices, bios, strategies, and contracts</div></div>
+  </div>
+</div>
+
+<!-- EMAIL BUILDER -->
+<div id="tab-email" class="tool-section">
+  <div class="section-title">Email Builder</div>
+  <div class="section-sub">Build beautiful emails with AI-generated copy. Click sections to edit.</div>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Settings</div>
+        <label>Campaign name</label>
+        <input type="text" id="emailName" value="Summer Launch" placeholder="e.g. Product Launch">
+        <label>Subject line</label>
+        <input type="text" id="emailSubject" value="🔥 Something big is coming..." placeholder="Your subject line">
+        <label>Brand tone</label>
+        <select id="emailTone">
+          <option>Professional</option><option>Friendly</option><option>Bold</option><option>Minimal</option>
+        </select>
+        <label>Primary CTA</label>
+        <input type="text" id="emailCTA" value="Shop Now" placeholder="Button text">
+        <div style="margin-top:14px;display:flex;gap:8px;">
+          <button class="btn btn-primary" onclick="generateEmail()">✦ Generate with AI ↗</button>
+          <button class="btn btn-sm" onclick="copyEmail()">Copy HTML</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Sections <span class="badge">Click to select</span></div>
+        <div class="email-section selected" id="es-header" onclick="selectEmailSection('header')">
+          <div class="section-handle">HEADER</div>
+          <div style="text-align:center;font-weight:500;font-size:15px;" id="email-header-text">Your Brand Name</div>
+        </div>
+        <div class="email-section" id="es-hero" onclick="selectEmailSection('hero')">
+          <div class="section-handle">HERO</div>
+          <div style="text-align:center;" id="email-hero-text">
+            <div style="font-weight:500;font-size:16px;margin-bottom:4px;">Big headline goes here</div>
+            <div style="font-size:13px;color:var(--color-text-secondary);">Supporting subtext that converts</div>
+          </div>
+        </div>
+        <div class="email-section" id="es-body" onclick="selectEmailSection('body')">
+          <div class="section-handle">BODY COPY</div>
+          <div style="font-size:13px;line-height:1.6;" id="email-body-text">Your main message content goes here. This is where you connect with your audience and drive action.</div>
+        </div>
+        <div class="email-section" id="es-cta" onclick="selectEmailSection('cta')">
+          <div class="section-handle">CALL TO ACTION</div>
+          <div style="text-align:center;"><button class="btn btn-primary" style="pointer-events:none;" id="email-cta-text">Shop Now</button></div>
+        </div>
+        <div class="email-section" id="es-footer" onclick="selectEmailSection('footer')">
+          <div class="section-handle">FOOTER</div>
+          <div style="text-align:center;font-size:11px;color:var(--color-text-tertiary);">Unsubscribe · Privacy Policy · 123 Brand St</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">AI Output <span class="badge-green badge" id="email-status">Ready</span></div>
+        <div id="emailOutput" class="output-box" style="min-height:320px;">Your AI-generated email copy will appear here. Click "Generate with AI" to start.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Section editor</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;" id="sectionEditorLabel">Selected: Header</div>
+        <textarea id="sectionEditor" placeholder="Edit selected section content..." style="min-height:80px;" oninput="updateEmailSection(this.value)">Your Brand Name</textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="generateSection()">✦ AI Rewrite ↗</button>
+          <button class="btn btn-sm" onclick="makeItShorter()">Shorter</button>
+          <button class="btn btn-sm" onclick="makeItBolder()">More bold</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IG GRID PLANNER -->
+<div id="tab-ig" class="tool-section">
+  <div class="section-title">Instagram Grid Planner</div>
+  <div class="section-sub">Plan your feed aesthetic before you post. Click any cell to label it.</div>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Grid preview <span class="badge">9 most recent posts</span></div>
+        <div class="ig-grid" id="igGrid"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" onclick="generateIGCaptions()">✦ Generate captions ↗</button>
+          <button class="btn btn-sm" onclick="shuffleGrid()">Shuffle</button>
+          <button class="btn btn-sm" onclick="clearGrid()">Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Theme palette</div>
+        <div class="row">
+          <div class="chip selected" onclick="selectTheme(this,'Warm & earthy')">Warm & earthy</div>
+          <div class="chip" onclick="selectTheme(this,'Clean minimal')">Clean minimal</div>
+          <div class="chip" onclick="selectTheme(this,'Bold & vibrant')">Bold & vibrant</div>
+          <div class="chip" onclick="selectTheme(this,'Dark moody')">Dark moody</div>
+          <div class="chip" onclick="selectTheme(this,'Pastel soft')">Pastel soft</div>
+        </div>
+        <div style="margin-top:12px;">
+          <label>Niche / content type</label>
+          <select id="igNiche">
+            <option>Lifestyle</option><option>Fashion</option><option>Food</option><option>Fitness</option><option>Business</option><option>Travel</option><option>Beauty</option><option>Tech</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Caption generator</div>
+        <label>Post topic / description</label>
+        <textarea id="igTopic" placeholder="Describe your post or paste a photo description..." style="min-height:70px;"></textarea>
+        <label>Caption style</label>
+        <div class="row" style="margin-top:6px;margin-bottom:10px;">
+          <div class="chip selected" id="cap-engaging" onclick="selectCap(this,'Engaging')">Engaging</div>
+          <div class="chip" id="cap-storytelling" onclick="selectCap(this,'Storytelling')">Storytelling</div>
+          <div class="chip" id="cap-minimal" onclick="selectCap(this,'Minimal')">Minimal</div>
+          <div class="chip" id="cap-cta" onclick="selectCap(this,'CTA-driven')">CTA-driven</div>
+        </div>
+        <button class="btn btn-primary" onclick="generateCaption()">✦ Write caption ↗</button>
+        <div style="margin-top:12px;" id="captionOutput" class="output-box">Your caption + hashtags will appear here.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Posting schedule</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">
+          <div style="font-size:11px;color:var(--color-text-tertiary);">M</div><div style="font-size:11px;color:var(--color-text-tertiary);">T</div><div style="font-size:11px;color:var(--color-text-tertiary);">W</div><div style="font-size:11px;color:var(--color-text-tertiary);">T</div><div style="font-size:11px;color:var(--color-text-tertiary);">F</div><div style="font-size:11px;color:var(--color-text-tertiary);">S</div><div style="font-size:11px;color:var(--color-text-tertiary);">S</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px;text-align:center;" id="scheduleGrid"></div>
+        <div style="margin-top:10px;font-size:12px;color:var(--color-text-secondary);">Best time to post: <strong style="color:var(--color-text-primary);">Tue & Fri 6–8pm</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAROUSEL BUILDER -->
+<div id="tab-carousel" class="tool-section">
+  <div class="section-title">Carousel Builder</div>
+  <div class="section-sub">Build multi-slide carousels for Instagram, LinkedIn, or any platform.</div>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Carousel settings</div>
+        <label>Topic / title</label>
+        <input type="text" id="carouselTopic" value="5 tips for better content" placeholder="e.g. 10 morning habits">
+        <label>Platform</label>
+        <select id="carouselPlatform">
+          <option>Instagram</option><option>LinkedIn</option><option>Pinterest</option><option>Twitter/X</option>
+        </select>
+        <label>Slide count</label>
+        <input type="range" min="3" max="10" value="5" id="slideCount" oninput="document.getElementById('slideCountOut').textContent=this.value;updateSlideCount(this.value)" style="width:100%">
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Slides: <span id="slideCountOut">5</span></div>
+        <label>Style</label>
+        <div class="row" style="margin-bottom:12px;">
+          <div class="chip selected" onclick="selectChipGroup(this,'carouselStyle')">Educational</div>
+          <div class="chip" onclick="selectChipGroup(this,'carouselStyle')">Listicle</div>
+          <div class="chip" onclick="selectChipGroup(this,'carouselStyle')">Story</div>
+          <div class="chip" onclick="selectChipGroup(this,'carouselStyle')">Tutorial</div>
+        </div>
+        <button class="btn btn-primary" onclick="generateCarousel()">✦ Generate slides ↗</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Slide editor</div>
+        <label>Slide headline</label>
+        <input type="text" id="slideHeadline" placeholder="Edit this slide's headline">
+        <label>Slide body</label>
+        <textarea id="slideBody" placeholder="Edit this slide's body copy..." style="min-height:70px;"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn btn-sm btn-primary" onclick="applySlideEdit()">Apply</button>
+          <button class="btn btn-sm" onclick="rewriteSlide()">✦ AI Rewrite ↗</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Preview</div>
+        <div class="carousel-slide" id="carouselPreview">
+          <div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:8px;">SLIDE 1</div>
+          <div style="font-size:18px;font-weight:500;color:var(--color-text-primary);" id="previewHeadline">Generate your carousel to start</div>
+          <div style="font-size:13px;color:var(--color-text-secondary);margin-top:8px;line-height:1.6;" id="previewBody">Your slide content will appear here after you click generate.</div>
+        </div>
+        <div class="carousel-nav" id="carouselDots"></div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;">
+          <button class="btn btn-sm" onclick="prevSlide()">← Prev</button>
+          <button class="btn btn-sm" onclick="nextSlide()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT PLANNER -->
+<div id="tab-content" class="tool-section">
+  <div class="section-title">Content Planner</div>
+  <div class="section-sub">Plan your entire content calendar with AI-generated ideas and scheduling.</div>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Generate content calendar</div>
+        <label>Your niche / brand</label>
+        <input type="text" id="plannerNiche" value="" placeholder="e.g. Fitness coach, Digital marketer, Food blogger">
+        <label>Platforms</label>
+        <div class="row" style="margin:6px 0 10px;" id="platformChips">
+          <div class="chip selected" onclick="toggleChip(this)">Instagram</div>
+          <div class="chip selected" onclick="toggleChip(this)">TikTok</div>
+          <div class="chip" onclick="toggleChip(this)">YouTube</div>
+          <div class="chip" onclick="toggleChip(this)">LinkedIn</div>
+          <div class="chip" onclick="toggleChip(this)">Twitter/X</div>
+          <div class="chip" onclick="toggleChip(this)">Newsletter</div>
+        </div>
+        <label>Timeframe</label>
+        <select id="plannerTime">
+          <option>1 week</option><option>2 weeks</option><option selected>1 month</option><option>3 months</option>
+        </select>
+        <label>Content pillars (themes)</label>
+        <input type="text" id="plannerPillars" placeholder="e.g. Education, Inspiration, Behind the scenes, Promotions">
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" onclick="generateContentPlan()">✦ Build my calendar ↗</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Content calendar <span class="badge" id="planBadge">0 ideas</span></div>
+        <div id="contentCalOutput" class="output-box" style="min-height:300px;">Fill out the form and generate your personalized content calendar. You'll get post ideas, formats, and optimal posting times.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO EDITOR -->
+<div id="tab-video" class="tool-section">
+  <div class="section-title">Video Editor Suite</div>
+  <div class="section-sub">Script writing, scene planning, and timeline tools for your video content.</div>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Script generator</div>
+        <label>Video topic</label>
+        <input type="text" id="videoTopic" placeholder="e.g. How I grew to 100k followers in 90 days">
+        <label>Video type</label>
+        <select id="videoType">
+          <option>Short-form (Reels/TikTok)</option><option>YouTube video (5-10 min)</option><option>YouTube long-form (20+ min)</option><option>Talking head</option><option>Tutorial</option><option>Vlog</option>
+        </select>
+        <label>Hook style</label>
+        <div class="row" style="margin:6px 0 10px;">
+          <div class="chip selected" onclick="selectChipGroup(this,'hookStyle')">Bold claim</div>
+          <div class="chip" onclick="selectChipGroup(this,'hookStyle')">Question</div>
+          <div class="chip" onclick="selectChipGroup(this,'hookStyle')">Story</div>
+          <div class="chip" onclick="selectChipGroup(this,'hookStyle')">Shocking stat</div>
+        </div>
+        <button class="btn btn-primary" onclick="generateScript()">✦ Write script ↗</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Scene planner</div>
+        <div id="sceneList">
+          <div style="font-size:13px;color:var(--color-text-secondary);">Generate a script first to auto-populate scenes, or add manually.</div>
+        </div>
+        <button class="btn btn-sm" style="margin-top:10px;" onclick="addScene()">+ Add scene</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Script output <span class="badge" id="wordCountBadge">0 words</span></div>
+        <div id="scriptOutput" class="output-box" style="min-height:200px;">Your script will appear here. AI will write hooks, body, and CTA sections formatted for your video type.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Timeline</div>
+        <div class="video-timeline" id="videoTimeline">
+          <div class="track-label">Video track</div>
+          <div class="timeline-track" id="videoTrack">
+            <div class="track-clip" style="width:15%;background:#EEEDFE;color:#534AB7;">Hook</div>
+            <div class="track-clip" style="width:45%;background:#E6F1FB;color:#185FA5;">Main content</div>
+            <div class="track-clip" style="width:25%;background:#EAF3DE;color:#3B6D11;">Story/proof</div>
+            <div class="track-clip" style="width:15%;background:#FAEEDA;color:#854F0B;">CTA</div>
+          </div>
+          <div class="track-label" style="margin-top:6px;">Audio / music</div>
+          <div class="timeline-track">
+            <div class="track-clip" style="width:100%;background:#F1EFE8;color:#5F5E5A;">Background music (full)</div>
+          </div>
+          <div class="track-label" style="margin-top:6px;">B-roll track</div>
+          <div class="timeline-track">
+            <div class="track-clip" style="width:30%;background:#FBEAF0;color:#993556;">B-roll 1</div>
+            <div style="width:10%;"></div>
+            <div class="track-clip" style="width:35%;background:#FBEAF0;color:#993556;">B-roll 2</div>
+            <div style="width:5%;"></div>
+            <div class="track-clip" style="width:20%;background:#FBEAF0;color:#993556;">B-roll 3</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" onclick="generateTimeline()">✦ Auto-build timeline ↗</button>
+          <button class="btn btn-sm" onclick="addTrack()">+ Add track</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDUCATION TOOLS -->
+<div id="tab-edu" class="tool-section">
+  <div class="section-title">Education Tools</div>
+  <div class="section-sub">Build lessons, quizzes, course outlines, and study guides.</div>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Course outline builder</div>
+        <label>Course topic</label>
+        <input type="text" id="courseTopic" placeholder="e.g. Social media marketing for beginners">
+        <label>Target audience</label>
+        <input type="text" id="courseAudience" placeholder="e.g. Small business owners, beginners">
+        <label>Format</label>
+        <select id="courseFormat">
+          <option>Online course (video)</option><option>Workshop</option><option>eBook</option><option>Email course</option><option>Live webinar series</option>
+        </select>
+        <label>Number of modules</label>
+        <input type="range" min="3" max="12" value="6" id="moduleCount" oninput="document.getElementById('moduleOut').textContent=this.value" style="width:100%;">
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Modules: <span id="moduleOut">6</span></div>
+        <button class="btn btn-primary" onclick="generateCourse()">✦ Build course outline ↗</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Quiz generator</div>
+        <label>Quiz topic</label>
+        <input type="text" id="quizTopic" placeholder="e.g. Instagram algorithm basics">
+        <label>Difficulty</label>
+        <div class="row" style="margin:6px 0 10px;">
+          <div class="chip selected" onclick="selectChipGroup(this,'quizDiff')">Beginner</div>
+          <div class="chip" onclick="selectChipGroup(this,'quizDiff')">Intermediate</div>
+          <div class="chip" onclick="selectChipGroup(this,'quizDiff')">Advanced</div>
+        </div>
+        <button class="btn btn-primary" onclick="generateQuiz()">✦ Generate quiz ↗</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Output <span class="badge" id="eduBadge">Ready</span></div>
+        <div id="eduOutput" class="output-box" style="min-height:420px;">Generate a course outline or quiz and it will appear here. Perfect for Teachable, Kajabi, Gumroad, or your own membership site.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SALES TOOLS -->
+<div id="tab-sales" class="tool-section">
+  <div class="section-title">Sales Tools</div>
+  <div class="section-sub">Create pitches, proposals, sales pages, and DM scripts that convert.</div>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Sales page writer</div>
+        <label>Product / offer name</label>
+        <input type="text" id="salesProduct" placeholder="e.g. 1:1 Coaching Program">
+        <label>Price point</label>
+        <input type="text" id="salesPrice" placeholder="e.g. $997 or $97/month">
+        <label>Target customer</label>
+        <textarea id="salesTarget" placeholder="Who is this for? What's their problem?" style="min-height:60px;"></textarea>
+        <label>Main transformation / outcome</label>
+        <input type="text" id="salesOutcome" placeholder="e.g. Go from 0 to 10k followers in 60 days">
+        <label>Sales page section</label>
+        <select id="salesSection">
+          <option>Full sales page</option><option>Headline only</option><option>Hero section</option><option>Benefits section</option><option>Testimonials framing</option><option>FAQ section</option><option>Pricing / CTA section</option>
+        </select>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="generateSalesPage()">✦ Write copy ↗</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">DM / pitch scripts</div>
+        <label>Script type</label>
+        <select id="dmType">
+          <option>Cold DM intro</option><option>Follow-up message</option><option>Discovery call invite</option><option>Objection handler</option><option>Partnership pitch</option>
+        </select>
+        <label>Your offer in one line</label>
+        <input type="text" id="dmOffer" placeholder="e.g. I help coaches build funnels">
+        <button class="btn btn-primary" style="margin-top:12px;" onclick="generateDMScript()">✦ Write script ↗</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Copy output <span class="badge" id="salesBadge">Ready</span></div>
+        <div id="salesOutput" class="output-box" style="min-height:420px;">Your sales copy will appear here. From full sales pages to DM scripts — built to convert.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BUSINESS TOOLS -->
+<div id="tab-biz" class="tool-section">
+  <div class="section-title">Business Tools</div>
+  <div class="section-sub">Bios, contracts, strategies, invoices, and brand kits — all AI-generated.</div>
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Tool picker</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="bizToolPicker">
+          <div class="tool-card" onclick="selectBizTool('bio')" id="biztool-bio" style="padding:12px;"><div style="font-size:16px;margin-bottom:6px;">👤</div><div class="tool-card-name" style="font-size:13px;">Creator bio</div></div>
+          <div class="tool-card" onclick="selectBizTool('strategy')" id="biztool-strategy" style="padding:12px;"><div style="font-size:16px;margin-bottom:6px;">📊</div><div class="tool-card-name" style="font-size:13px;">Growth strategy</div></div>
+          <div class="tool-card" onclick="selectBizTool('invoice')" id="biztool-invoice" style="padding:12px;"><div style="font-size:16px;margin-bottom:6px;">💳</div><div class="tool-card-name" style="font-size:13px;">Invoice generator</div></div>
+          <div class="tool-card" onclick="selectBizTool('contract')" id="biztool-contract" style="padding:12px;"><div style="font-size:16px;margin-bottom:6px;">📄</div><div class="tool-card-name" style="font-size:13px;">Contract template</div></div>
+          <div class="tool-card" onclick="selectBizTool('mediakit')" id="biztool-mediakit" style="padding:12px;"><div style="font-size:16px;margin-bottom:6px;">🎨</div><div class="tool-card-name" style="font-size:13px;">Media kit</div></div>
+          <div class="tool-card" onclick="selectBizTool('pitch')" id="biztool-pitch" style="padding:12px;"><div style="font-size:16px;margin-bottom:6px;">🤝</div><div class="tool-card-name" style="font-size:13px;">Brand pitch deck</div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" id="bizFormCard">
+        <div class="card-title" id="bizFormTitle">Select a tool →</div>
+        <div id="bizForm">
+          <div style="font-size:13px;color:var(--color-text-secondary);">Pick a business tool from the left to get started.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Output <span class="badge" id="bizBadge">Ready</span></div>
+        <div id="bizOutput" class="output-box" style="min-height:180px;">Your business document will appear here.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+const API = "https://api.anthropic.com/v1/messages";
+const MODEL = "claude-sonnet-4-20250514";
+
+function switchTab(id) {
+  document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  const names = ['home','email','ig','carousel','content','video','edu','sales','biz'];
+  const idx = names.indexOf(id);
+  if (idx >= 0) tabs[idx].classList.add('active');
+}
+
+async function callAI(prompt, outputId, badgeId, loadingMsg) {
+  const out = document.getElementById(outputId);
+  const badge = badgeId ? document.getElementById(badgeId) : null;
+  out.innerHTML = '<span class="spinner"></span>' + (loadingMsg || 'Generating...');
+  if (badge) badge.textContent = 'Generating...';
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: MODEL, max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('') || 'Error generating content.';
+    out.textContent = text;
+    if (badge) badge.textContent = 'Done';
+    return text;
+  } catch (e) {
+    out.textContent = 'Error: Could not reach AI. Please try again.';
+    if (badge) badge.textContent = 'Error';
+  }
+}
+
+function generateEmail() {
+  const name = document.getElementById('emailName').value;
+  const subject = document.getElementById('emailSubject').value;
+  const tone = document.getElementById('emailTone').value;
+  const cta = document.getElementById('emailCTA').value;
+  callAI(`Write a complete marketing email for a campaign called "${name}". Subject line: "${subject}". Tone: ${tone}. CTA button text: "${cta}". Include: compelling header, hero headline, body copy (2-3 paragraphs), and a strong call to action. Format clearly with section labels.`, 'emailOutput', 'email-status', 'Writing your email...');
+}
+
+let selectedEmailSection = 'header';
+function selectEmailSection(sec) {
+  document.querySelectorAll('.email-section').forEach(e => e.classList.remove('selected'));
+  document.getElementById('es-' + sec).classList.add('selected');
+  selectedEmailSection = sec;
+  const labels = {header:'Header', hero:'Hero section', body:'Body copy', cta:'Call to action', footer:'Footer'};
+  document.getElementById('sectionEditorLabel').textContent = 'Selected: ' + labels[sec];
+  const content = document.getElementById('email-' + sec + '-text');
+  if (content) document.getElementById('sectionEditor').value = content.textContent;
+}
+function updateEmailSection(val) {
+  const el = document.getElementById('email-' + selectedEmailSection + '-text');
+  if (el) el.textContent = val;
+}
+function generateSection() {
+  const sec = selectedEmailSection;
+  const tone = document.getElementById('emailTone').value;
+  const cta = document.getElementById('emailCTA').value;
+  const prompt = `Write a ${sec} section for a marketing email. Tone: ${tone}. CTA: ${cta}. Keep it concise and punchy. Return just the copy text.`;
+  callAI(prompt, 'emailOutput', 'email-status', 'Rewriting section...').then(t => {
+    if (t) { document.getElementById('sectionEditor').value = t; updateEmailSection(t); }
+  });
+}
+function makeItShorter() { callAI('Take this email content and make it 30% shorter while keeping the punch: ' + document.getElementById('emailOutput').textContent, 'emailOutput', 'email-status', 'Trimming...'); }
+function makeItBolder() { callAI('Rewrite this email copy to be more bold, direct and persuasive: ' + document.getElementById('emailOutput').textContent, 'emailOutput', 'email-status', 'Amplifying...'); }
+function copyEmail() { navigator.clipboard.writeText(document.getElementById('emailOutput').textContent); }
+
+// IG GRID
+const themes = ['#FAEEDA','#EAF3DE','#E6F1FB','#EEEDFE','#FBEAF0','#FAECE7','#E1F5EE','#F1EFE8','#FAEEDA'];
+const igLabels = ['Product','Lifestyle','Quote','Tutorial','BTS','Collab','Promo','Personal','Tip'];
+let selectedIGCell = null;
+function buildIGGrid() {
+  const grid = document.getElementById('igGrid');
+  grid.innerHTML = '';
+  for (let i = 9; i >= 1; i--) {
+    const cell = document.createElement('div');
+    cell.className = 'ig-cell';
+    cell.style.background = themes[9-i];
+    cell.innerHTML = `<span class="cell-num">${i}</span><span class="cell-label">${igLabels[9-i]}</span>`;
+    cell.onclick = () => editIGCell(cell, i);
+    grid.appendChild(cell);
+  }
+}
+function editIGCell(cell, num) {
+  const newLabel = prompt(`Post #${num} type:`, cell.querySelector('.cell-label').textContent);
+  if (newLabel) cell.querySelector('.cell-label').textContent = newLabel;
+}
+function shuffleGrid() {
+  const shuffled = [...themes].sort(() => Math.random() - 0.5);
+  const cells = document.querySelectorAll('.ig-cell');
+  cells.forEach((c, i) => c.style.background = shuffled[i]);
+}
+function clearGrid() { document.querySelectorAll('.ig-cell .cell-label').forEach(l => l.textContent = ''); }
+function generateIGCaptions() {
+  const niche = document.getElementById('igNiche').value;
+  callAI(`Generate 9 unique Instagram captions for a ${niche} creator. One for each post type: Product, Lifestyle, Quote, Tutorial, BTS, Collab, Promo, Personal, Tip. Include 5-10 relevant hashtags for each. Number them 1-9.`, 'captionOutput', null, 'Writing captions...');
+}
+let selectedCapStyle = 'Engaging';
+function selectCap(el, style) { document.querySelectorAll('[id^=cap-]').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); selectedCapStyle = style; }
+function generateCaption() {
+  const topic = document.getElementById('igTopic').value || 'lifestyle post';
+  const niche = document.getElementById('igNiche').value;
+  callAI(`Write an Instagram caption for a ${niche} creator about: "${topic}". Style: ${selectedCapStyle}. Include hook, body, CTA, and 10 hashtags.`, 'captionOutput', null, 'Writing caption...');
+}
+function buildScheduleGrid() {
+  const grid = document.getElementById('scheduleGrid');
+  const days = [true, false, true, false, true, false, true];
+  grid.innerHTML = days.map((d, i) => `<div style="height:28px;border-radius:var(--border-radius-md);background:${d ? '#EEEDFE' : 'var(--color-background-secondary)'};display:flex;align-items:center;justify-content:center;font-size:11px;color:${d ? '#534AB7' : 'var(--color-text-tertiary)'};cursor:pointer;border:0.5px solid ${d ? '#AFA9EC' : 'var(--color-border-tertiary)'};" onclick="toggleDay(this)">${d ? '✓' : ''}</div>`).join('');
+}
+function toggleDay(el) {
+  const active = el.style.background === 'rgb(238, 237, 254)' || el.style.background === '#EEEDFE';
+  el.style.background = active ? 'var(--color-background-secondary)' : '#EEEDFE';
+  el.style.color = active ? 'var(--color-text-tertiary)' : '#534AB7';
+  el.style.borderColor = active ? 'var(--color-border-tertiary)' : '#AFA9EC';
+  el.textContent = active ? '' : '✓';
+}
+function selectTheme(el, theme) { document.querySelectorAll('#tab-ig .chip').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); }
+
+// CAROUSEL
+let slides = [];
+let currentSlide = 0;
+function generateCarousel() {
+  const topic = document.getElementById('carouselTopic').value || '5 tips for better content';
+  const platform = document.getElementById('carouselPlatform').value;
+  const count = document.getElementById('slideCount').value;
+  callAI(`Create a ${count}-slide ${platform} carousel about: "${topic}". For each slide provide: SLIDE N: [Headline] | [Body copy - 1-2 sentences max]. Format exactly like: SLIDE 1: Headline here | Body text here. Keep headlines punchy (5-7 words max).`, 'carouselPreview', null, 'Building slides...').then(text => {
+    if (!text) return;
+    slides = [];
+    const lines = text.split('\n').filter(l => l.includes('SLIDE') && l.includes('|'));
+    lines.forEach(line => {
+      const parts = line.split('|');
+      const headline = parts[0].replace(/SLIDE \d+:\s*/,'').trim();
+      const body = parts[1] ? parts[1].trim() : '';
+      slides.push({ headline, body });
+    });
+    if (slides.length === 0) { slides = [{ headline: topic, body: text.substring(0, 120) }]; }
+    currentSlide = 0;
+    renderSlide();
+    buildDots();
+  });
+}
+function renderSlide() {
+  if (slides.length === 0) return;
+  const s = slides[currentSlide];
+  document.getElementById('previewHeadline').textContent = s.headline;
+  document.getElementById('previewBody').textContent = s.body;
+  document.getElementById('carouselPreview').querySelector('div').textContent = `SLIDE ${currentSlide + 1} of ${slides.length}`;
+  document.getElementById('slideHeadline').value = s.headline;
+  document.getElementById('slideBody').value = s.body;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+}
+function buildDots() {
+  const nav = document.getElementById('carouselDots');
+  nav.innerHTML = slides.map((_, i) => `<div class="dot${i===0?' active':''}" onclick="goToSlide(${i})"></div>`).join('');
+}
+function goToSlide(i) { currentSlide = i; renderSlide(); }
+function prevSlide() { if (currentSlide > 0) { currentSlide--; renderSlide(); } }
+function nextSlide() { if (currentSlide < slides.length-1) { currentSlide++; renderSlide(); } }
+function applySlideEdit() {
+  if (slides.length === 0) return;
+  slides[currentSlide].headline = document.getElementById('slideHeadline').value;
+  slides[currentSlide].body = document.getElementById('slideBody').value;
+  renderSlide();
+}
+function rewriteSlide() {
+  if (slides.length === 0) return;
+  const s = slides[currentSlide];
+  callAI(`Rewrite this carousel slide to be more engaging. Current: "${s.headline}" / "${s.body}". Return exactly: HEADLINE: [new headline] | BODY: [new body]`, 'carouselPreview', null, 'Rewriting...').then(t => {
+    if (!t) return;
+    const hMatch = t.match(/HEADLINE:\s*([^|]+)/); const bMatch = t.match(/BODY:\s*(.+)/s);
+    if (hMatch) slides[currentSlide].headline = hMatch[1].trim();
+    if (bMatch) slides[currentSlide].body = bMatch[1].trim();
+    renderSlide();
+  });
+}
+function updateSlideCount(n) { slides = []; document.getElementById('carouselDots').innerHTML = ''; }
+
+// CONTENT PLANNER
+function generateContentPlan() {
+  const niche = document.getElementById('plannerNiche').value || 'creator';
+  const platforms = Array.from(document.querySelectorAll('#platformChips .chip.selected')).map(c => c.textContent).join(', ');
+  const time = document.getElementById('plannerTime').value;
+  const pillars = document.getElementById('plannerPillars').value || 'Education, Entertainment, Promotion';
+  const prompt = `Create a content calendar for a ${niche} creator posting on: ${platforms}. Timeframe: ${time}. Content pillars: ${pillars}. For each week, list 3-5 specific post ideas with: Platform, Format (Reel/Post/Story/etc), Topic, Best day to post. Make ideas specific and actionable, not generic.`;
+  callAI(prompt, 'contentCalOutput', 'planBadge', 'Planning your calendar...').then(t => {
+    if (t) { const count = (t.match(/Reel|Post|Story|Video|Newsletter/gi) || []).length; document.getElementById('planBadge').textContent = count + ' ideas'; }
+  });
+}
+
+// VIDEO
+let sceneCount = 0;
+function generateScript() {
+  const topic = document.getElementById('videoTopic').value || 'content creation tips';
+  const type = document.getElementById('videoType').value;
+  const hook = document.querySelector('#tab-video .chip.selected')?.textContent || 'Bold claim';
+  callAI(`Write a complete video script for: "${topic}". Video type: ${type}. Hook style: ${hook}. Structure: HOOK (first 3-5 seconds) → INTRO → MAIN CONTENT (3-5 key points) → STORY/PROOF → CTA. Use [B-ROLL] markers where visual cuts should go. Keep it punchy and conversational.`, 'scriptOutput', 'wordCountBadge', 'Writing your script...').then(t => {
+    if (t) { document.getElementById('wordCountBadge').textContent = t.split(' ').length + ' words'; populateScenes(t); }
+  });
+}
+function populateScenes(script) {
+  const sections = ['HOOK', 'INTRO', 'MAIN CONTENT', 'STORY', 'CTA'];
+  const list = document.getElementById('sceneList');
+  list.innerHTML = sections.map((s, i) => `<div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:6px;"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#EEEDFE;color:#534AB7;min-width:60px;text-align:center;">${s}</span><span style="font-size:12px;color:var(--color-text-secondary);">Scene ${i+1}</span></div>`).join('');
+  sceneCount = sections.length;
+}
+function addScene() {
+  sceneCount++;
+  const list = document.getElementById('sceneList');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:6px;';
+  div.innerHTML = `<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#EAF3DE;color:#3B6D11;min-width:60px;text-align:center;">SCENE</span><input type="text" placeholder="Scene description..." style="flex:1;font-size:12px;">`;
+  list.appendChild(div);
+}
+function generateTimeline() { callAI(`Create a video editing timeline breakdown for a ${document.getElementById('videoType').value} video about "${document.getElementById('videoTopic').value || 'content tips'}". List: timecode, scene type, duration, notes. Format as a table.`, 'scriptOutput', 'wordCountBadge', 'Building timeline...'); }
+function addTrack() {
+  const tl = document.getElementById('videoTimeline');
+  const track = document.createElement('div');
+  track.innerHTML = `<div class="track-label" style="margin-top:6px;">New track</div><div class="timeline-track"><div class="track-clip" style="width:100%;background:var(--color-background-secondary);color:var(--color-text-secondary);">Click to add clip</div></div>`;
+  tl.appendChild(track);
+}
+
+// EDU
+function generateCourse() {
+  const topic = document.getElementById('courseTopic').value || 'content creation';
+  const audience = document.getElementById('courseAudience').value || 'beginners';
+  const format = document.getElementById('courseFormat').value;
+  const modules = document.getElementById('moduleCount').value;
+  callAI(`Create a ${modules}-module ${format} curriculum outline for: "${topic}". Target audience: ${audience}. For each module include: Module title, Learning objectives (2-3), Lesson topics (3-5), Assignment or exercise. Make it detailed and actionable.`, 'eduOutput', 'eduBadge', 'Building your course...');
+}
+function generateQuiz() {
+  const topic = document.getElementById('quizTopic').value || 'social media';
+  const diff = document.querySelector('#tab-edu .chip.selected')?.textContent || 'Beginner';
+  callAI(`Create a 10-question multiple choice quiz about "${topic}" at ${diff} level. For each question: Question, 4 answer options (A/B/C/D), correct answer marked with ✓, brief explanation. Number questions 1-10.`, 'eduOutput', 'eduBadge', 'Writing your quiz...');
+}
+
+// SALES
+function generateSalesPage() {
+  const product = document.getElementById('salesProduct').value || 'coaching program';
+  const price = document.getElementById('salesPrice').value || '$997';
+  const target = document.getElementById('salesTarget').value || 'entrepreneurs';
+  const outcome = document.getElementById('salesOutcome').value || 'grow their business';
+  const section = document.getElementById('salesSection').value;
+  callAI(`Write ${section} for a sales page. Product: "${product}" priced at ${price}. Target customer: ${target}. Main outcome: "${outcome}". Use proven copywriting frameworks (AIDA, PAS). Make it compelling and conversion-focused.`, 'salesOutput', 'salesBadge', 'Writing sales copy...');
+}
+function generateDMScript() {
+  const type = document.getElementById('dmType').value;
+  const offer = document.getElementById('dmOffer').value || 'help you grow';
+  callAI(`Write a ${type} for someone who ${offer}. Make it personal, not spammy. Under 100 words. Include a soft CTA. Sound human, not salesy.`, 'salesOutput', 'salesBadge', 'Writing script...');
+}
+
+// BIZ
+let currentBizTool = '';
+const bizForms = {
+  bio: { title: 'Creator bio generator', fields: [['Name / handle', 'text', 'bizName', '@yourhandle'], ['Niche', 'text', 'bizNiche', 'e.g. Fitness & nutrition'], ['Platforms', 'text', 'bizPlatforms', 'IG, TikTok, YouTube'], ['Tone', 'select', 'bizTone', ['Professional', 'Casual', 'Bold', 'Funny']]] },
+  strategy: { title: 'Growth strategy builder', fields: [['Current followers', 'text', 'bizFollowers', 'e.g. 2,500'], ['Goal', 'text', 'bizGoal', 'e.g. 50k in 6 months'], ['Platform', 'select', 'bizStrPlatform', ['Instagram', 'TikTok', 'YouTube', 'LinkedIn']]] },
+  invoice: { title: 'Invoice generator', fields: [['Client name', 'text', 'bizClient', ''], ['Service', 'text', 'bizService', 'e.g. UGC package - 5 videos'], ['Amount', 'text', 'bizAmount', 'e.g. $1,500'], ['Due date', 'text', 'bizDue', 'e.g. Net 30']] },
+  contract: { title: 'Contract template', fields: [['Project type', 'select', 'bizContractType', ['Brand deal', 'UGC', 'Consulting', 'Coaching']], ['Your name / business', 'text', 'bizContractName', ''], ['Deliverables', 'text', 'bizDeliverables', 'e.g. 3 Reels + 5 story frames']] },
+  mediakit: { title: 'Media kit writer', fields: [['Creator name', 'text', 'bizMKName', ''], ['Niche', 'text', 'bizMKNiche', ''], ['Audience size', 'text', 'bizMKSize', 'e.g. 15k IG / 30k TikTok'], ['Engagement rate', 'text', 'bizMKEng', 'e.g. 6.2%']] },
+  pitch: { title: 'Brand pitch writer', fields: [['Your niche', 'text', 'bizPitchNiche', ''], ['Brand you\'re pitching', 'text', 'bizPitchBrand', ''], ['What you offer', 'text', 'bizPitchOffer', 'e.g. 2 Reels + IG stories']] }
+};
+function selectBizTool(tool) {
+  currentBizTool = tool;
+  document.querySelectorAll('[id^=biztool-]').forEach(c => c.style.borderColor = 'var(--color-border-tertiary)');
+  document.getElementById('biztool-' + tool).style.borderColor = '#AFA9EC';
+  const cfg = bizForms[tool];
+  document.getElementById('bizFormTitle').textContent = cfg.title;
+  document.getElementById('bizForm').innerHTML = cfg.fields.map(([label, type, id, placeholder]) => {
+    if (type === 'select') return `<label>${label}</label><select id="${id}">${(Array.isArray(placeholder) ? placeholder : [placeholder]).map(o => `<option>${o}</option>`).join('')}</select>`;
+    return `<label>${label}</label><input type="text" id="${id}" placeholder="${placeholder}">`;
+  }).join('') + `<div style="margin-top:14px;"><button class="btn btn-primary" onclick="generateBizDoc()">✦ Generate ↗</button></div>`;
+}
+function generateBizDoc() {
+  const cfg = bizForms[currentBizTool];
+  const vals = cfg.fields.map(([label, , id]) => `${label}: ${document.getElementById(id)?.value || 'not specified'}`).join(', ');
+  const prompts = {
+    bio: `Write a professional creator bio for social media and a website. Details: ${vals}. Provide: 1-line bio, 3-line bio, and full about section.`,
+    strategy: `Create a detailed growth strategy for a creator. Details: ${vals}. Include: content strategy, posting frequency, engagement tactics, monetization path, 30/60/90 day milestones.`,
+    invoice: `Generate a professional freelance invoice. Details: ${vals}. Format it clearly with all standard invoice fields, payment terms, and professional language.`,
+    contract: `Write a professional freelance contract template. Details: ${vals}. Include: scope of work, deliverables, payment terms, revision policy, usage rights, termination clause.`,
+    mediakit: `Write media kit copy for a creator. Details: ${vals}. Include: about section, audience demographics, content offerings, brand partnership benefits, collaboration packages.`,
+    pitch: `Write a brand partnership pitch email. Details: ${vals}. Make it compelling, personal, professional. Include subject line, opening hook, value proposition, specific proposal, and CTA.`
+  };
+  callAI(prompts[currentBizTool], 'bizOutput', 'bizBadge', 'Generating your document...');
+}
+
+function selectChipGroup(el, group) {
+  const parent = el.closest('.row') || el.parentElement;
+  parent.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function toggleChip(el) { el.classList.toggle('selected'); }
+
+buildIGGrid();
+buildScheduleGrid();
+updateSlideCount(5);
+</script>
