@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 26.2.0.3 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="00:00:00"/>
+	<style type="text/css">
+		@page { size: 8.5in 11in; margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 115%; background: transparent }
+		pre { background: transparent }
+		pre.western { font-family: "Liberation Mono", monospace; font-size: 10pt }
+		pre.cjk { font-family: "Noto Sans Mono CJK SC", monospace; font-size: 10pt }
+		pre.ctl { font-family: "Liberation Mono", monospace; font-size: 10pt }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><pre class="western">import { useState, useRef } from &quot;react&quot;;
+
+const A=&quot;#1a1a1a&quot;, M=&quot;#888&quot;, B=&quot;#e8e5e0&quot;, BG=&quot;#faf9f7&quot;, W=&quot;#ffffff&quot;;
+const sf = (o={}) =&gt; ({ fontFamily:&quot;sans-serif&quot;, ...o });
+const cardStyle = (o={}) =&gt; ({ background:W, border:`0.5px solid ${B}`, borderRadius:10, padding:&quot;20px 22px&quot;, ...o });
+const btnStyle = (o={}) =&gt; ({ fontSize:13, padding:&quot;9px 18px&quot;, borderRadius:6, cursor:&quot;pointer&quot;, fontFamily:&quot;sans-serif&quot;, border:&quot;none&quot;, ...o });
+const inpStyle = (o={}) =&gt; ({ padding:&quot;9px 12px&quot;, border:`0.5px solid ${B}`, borderRadius:6, fontSize:13, fontFamily:&quot;sans-serif&quot;, width:&quot;100%&quot;, boxSizing:&quot;border-box&quot;, background:W, color:A, ...o });
+const Lbl = ({t}) =&gt; &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.1em&quot;,textTransform:&quot;uppercase&quot;,color:M,margin:&quot;0 0 4px&quot;})}&gt;{t}&lt;/p&gt;;
+const Back = ({onBack}) =&gt; &lt;button onClick={onBack} style={btnStyle({background:&quot;none&quot;,border:`0.5px solid ${B}`,color:M,marginBottom:20})}&gt;← dashboard&lt;/button&gt;;
+const Wrap = ({children}) =&gt; &lt;div style={{maxWidth:680,margin:&quot;0 auto&quot;,padding:&quot;24px 20px 48px&quot;,background:BG,minHeight:500}}&gt;{children}&lt;/div&gt;;
+const SectionTitle = ({t}) =&gt; &lt;h2 style={{fontFamily:&quot;Georgia,serif&quot;,fontWeight:400,fontSize:22,color:A,margin:&quot;0 0 18px&quot;}}&gt;{t}&lt;/h2&gt;;
+
+const TOOLS = [
+  {id:&quot;courses&quot;,cat:&quot;education&quot;,icon:&quot;◎&quot;,title:&quot;course player&quot;,desc:&quot;modules, lessons, quizzes &amp; certificate&quot;},
+  {id:&quot;pricing&quot;,cat:&quot;business&quot;,icon:&quot;◈&quot;,title:&quot;pricing calculator&quot;,desc:&quot;find your ideal price point&quot;},
+  {id:&quot;onboard&quot;,cat:&quot;business&quot;,icon:&quot;◉&quot;,title:&quot;client onboarding form&quot;,desc:&quot;build a client intake form&quot;},
+  {id:&quot;contract&quot;,cat:&quot;business&quot;,icon:&quot;◫&quot;,title:&quot;contract generator&quot;,desc:&quot;generate a simple service contract&quot;},
+  {id:&quot;proposal&quot;,cat:&quot;business&quot;,icon:&quot;◧&quot;,title:&quot;proposal builder&quot;,desc:&quot;build a client proposal&quot;},
+  {id:&quot;calendar&quot;,cat:&quot;content&quot;,icon:&quot;◰&quot;,title:&quot;30-day calendar&quot;,desc:&quot;plan your content month&quot;},
+  {id:&quot;caption&quot;,cat:&quot;content&quot;,icon:&quot;◱&quot;,title:&quot;ai caption writer&quot;,desc:&quot;ai-powered captions for creators&quot;},
+  {id:&quot;brandkit&quot;,cat:&quot;content&quot;,icon:&quot;◲&quot;,title:&quot;brand kit generator&quot;,desc:&quot;build your brand system live&quot;},
+  {id:&quot;storefront&quot;,cat:&quot;sales&quot;,icon:&quot;◳&quot;,title:&quot;digital storefront&quot;,desc:&quot;build your product page&quot;},
+  {id:&quot;checkout&quot;,cat:&quot;sales&quot;,icon:&quot;◴&quot;,title:&quot;checkout page builder&quot;,desc:&quot;design your checkout flow&quot;},
+  {id:&quot;salespage&quot;,cat:&quot;sales&quot;,icon:&quot;◵&quot;,title:&quot;sales page builder&quot;,desc:&quot;build a full sales page live&quot;},
+];
+
+const CAT_COLORS = {education:&quot;#f0ece4&quot;,business:&quot;#e8eef5&quot;,content:&quot;#edf5e8&quot;,sales:&quot;#f5e8e8&quot;};
+const CAT_TEXT = {education:&quot;#7a6e5e&quot;,business:&quot;#4a6a8a&quot;,content:&quot;#4a7a4a&quot;,sales:&quot;#8a4a4a&quot;};
+
+function Entry({onEnter}) {
+  const [name,setName]=useState(&quot;&quot;);
+  const [email,setEmail]=useState(&quot;&quot;);
+  const [err,setErr]=useState(&quot;&quot;);
+  const go=()=&gt;{ if(!name.trim()||!email.includes(&quot;@&quot;)){setErr(&quot;please enter your name and a valid email&quot;);return;} onEnter(name,email); };
+  return (
+    &lt;div style={{minHeight:500,display:&quot;flex&quot;,alignItems:&quot;center&quot;,justifyContent:&quot;center&quot;,background:BG,padding:24}}&gt;
+      &lt;div style={{width:&quot;100%&quot;,maxWidth:380}}&gt;
+        &lt;p style={sf({textAlign:&quot;center&quot;,fontSize:11,letterSpacing:&quot;0.18em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:8})}&gt;back room studio&lt;/p&gt;
+        &lt;h1 style={{textAlign:&quot;center&quot;,fontSize:26,fontFamily:&quot;Georgia,serif&quot;,fontWeight:400,color:A,margin:&quot;0 0 6px&quot;}}&gt;creator tool suite&lt;/h1&gt;
+        &lt;p style={sf({textAlign:&quot;center&quot;,fontSize:13,color:M,marginBottom:28})}&gt;free access for the back room community&lt;/p&gt;
+        &lt;div style={cardStyle()}&gt;
+          &lt;div style={{marginBottom:12}}&gt;&lt;Lbl t=&quot;your name&quot;/&gt;&lt;input style={inpStyle()} value={name} onChange={e=&gt;setName(e.target.value)} placeholder=&quot;first name or handle&quot;/&gt;&lt;/div&gt;
+          &lt;div style={{marginBottom:16}}&gt;&lt;Lbl t=&quot;email address&quot;/&gt;&lt;input style={inpStyle()} value={email} onChange={e=&gt;setEmail(e.target.value)} placeholder=&quot;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0c7563794c69616d6560226f6361">[email&#160;protected]</a>&quot;/&gt;&lt;/div&gt;
+          {err&amp;&amp;&lt;p style={sf({fontSize:12,color:&quot;#c05050&quot;,marginBottom:10})}&gt;{err}&lt;/p&gt;}
+          &lt;button style={btnStyle({background:A,color:W,width:&quot;100%&quot;,padding:11})} onClick={go}&gt;access tools →&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+function Dashboard({user,onSelect}) {
+  const cats=[&quot;education&quot;,&quot;business&quot;,&quot;content&quot;,&quot;sales&quot;];
+  return (
+    &lt;div style={{padding:&quot;28px 20px 48px&quot;,background:BG,minHeight:500}}&gt;
+      &lt;div style={{maxWidth:700,margin:&quot;0 auto&quot;}}&gt;
+        &lt;div style={{display:&quot;flex&quot;,justifyContent:&quot;space-between&quot;,alignItems:&quot;flex-end&quot;,marginBottom:28}}&gt;
+          &lt;div&gt;
+            &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.16em&quot;,textTransform:&quot;uppercase&quot;,color:M,margin:&quot;0 0 4px&quot;})}&gt;back room studio&lt;/p&gt;
+            &lt;h1 style={{fontFamily:&quot;Georgia,serif&quot;,fontWeight:400,fontSize:24,color:A,margin:0}}&gt;welcome, {user.name}&lt;/h1&gt;
+          &lt;/div&gt;
+          &lt;p style={sf({fontSize:12,color:M})}&gt;{TOOLS.length} tools&lt;/p&gt;
+        &lt;/div&gt;
+        {cats.map(cat=&gt;(
+          &lt;div key={cat} style={{marginBottom:24}}&gt;
+            &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.14em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:10})}&gt;{cat} tools&lt;/p&gt;
+            &lt;div style={{display:&quot;grid&quot;,gridTemplateColumns:&quot;repeat(auto-fill,minmax(200px,1fr))&quot;,gap:10}}&gt;
+              {TOOLS.filter(t=&gt;t.cat===cat).map(t=&gt;(
+                &lt;div key={t.id} onClick={()=&gt;onSelect(t.id)} style={{...cardStyle({cursor:&quot;pointer&quot;})}}&gt;
+                  &lt;div style={{display:&quot;flex&quot;,alignItems:&quot;center&quot;,gap:10,marginBottom:6}}&gt;
+                    &lt;span style={{fontSize:18,color:A}}&gt;{t.icon}&lt;/span&gt;
+                    &lt;span style={{fontSize:10,fontFamily:&quot;sans-serif&quot;,letterSpacing:&quot;0.1em&quot;,textTransform:&quot;uppercase&quot;,background:CAT_COLORS[cat],color:CAT_TEXT[cat],padding:&quot;2px 7px&quot;,borderRadius:4}}&gt;{cat}&lt;/span&gt;
+                  &lt;/div&gt;
+                  &lt;p style={{margin:&quot;0 0 4px&quot;,fontSize:14,color:A,fontWeight:500,fontFamily:&quot;sans-serif&quot;}}&gt;{t.title}&lt;/p&gt;
+                  &lt;p style={sf({fontSize:12,color:M,lineHeight:1.5})}&gt;{t.desc}&lt;/p&gt;
+                &lt;/div&gt;
+              ))}
+            &lt;/div&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+// COURSE PLAYER
+const MODULES_DATA=[
+  {id:1,title:&quot;foundations&quot;,lessons:[
+    {id:1,title:&quot;why digital products&quot;,body:&quot;Digital products are the most scalable income stream for solo creators. No inventory, no shipping — just value delivered instantly. In this lesson we break down why templates, guides, and courses beat client work for long-term freedom.&quot;,quiz:{q:&quot;What makes digital products scalable?&quot;,opts:[&quot;High shipping costs&quot;,&quot;No inventory or fulfillment needed&quot;,&quot;Requires a big team&quot;,&quot;Needs a storefront&quot;],ans:1}},
+    {id:2,title:&quot;picking your first product&quot;,body:&quot;Your first product should solve one specific problem for one specific person. We walk through a 3-question framework: who is frustrated, what are they trying to do, and what would make it 10x easier?&quot;,quiz:{q:&quot;What should your first product focus on?&quot;,opts:[&quot;A broad topic for everyone&quot;,&quot;One problem for one person&quot;,&quot;Multiple formats at once&quot;,&quot;What competitors sell&quot;],ans:1}},
+    {id:3,title:&quot;pricing without guessing&quot;,body:&quot;Pricing is psychology. The anchor-value method: start with what it would cost to solve the problem without your product, then price at 10–20% of that. Most creators underprice by 3x.&quot;,quiz:{q:&quot;The anchor-value method bases price on:&quot;,opts:[&quot;Your hourly rate&quot;,&quot;Your competitor's price&quot;,&quot;What it costs to solve without your product&quot;,&quot;Random testing&quot;],ans:2}},
+  ]},
+  {id:2,title:&quot;building your offer&quot;,lessons:[
+    {id:4,title:&quot;canva template workflow&quot;,body:&quot;A sellable Canva template needs locked structure and editable content. Lock your layout, fonts, and brand colors. Leave text boxes, color swatches, and image frames editable. Always test on a fresh account before selling.&quot;,quiz:{q:&quot;What should be locked in a sellable template?&quot;,opts:[&quot;Text boxes&quot;,&quot;Image frames&quot;,&quot;Layout, fonts, brand colors&quot;,&quot;Everything&quot;],ans:2}},
+    {id:5,title:&quot;writing your sales page&quot;,body:&quot;Five sections every digital product sales page needs: (1) the hook, (2) the problem, (3) your solution, (4) what's inside, (5) the offer with price and CTA. Keep it under 500 words for products under $100.&quot;,quiz:{q:&quot;How many core sections does a good sales page need?&quot;,opts:[&quot;2&quot;,&quot;5&quot;,&quot;10&quot;,&quot;8&quot;],ans:1}},
+  ]},
+  {id:3,title:&quot;selling without social&quot;,lessons:[
+    {id:6,title:&quot;your email list is everything&quot;,body:&quot;Social platforms rent you an audience. Your email list owns it. Set up a free Flodesk or Kit account, write a 3-email welcome sequence, and put your signup link everywhere.&quot;,quiz:{q:&quot;Why is email better than social for selling?&quot;,opts:[&quot;It's free&quot;,&quot;You own the audience&quot;,&quot;More people use email&quot;,&quot;It looks more professional&quot;],ans:1}},
+    {id:7,title:&quot;your storefront setup&quot;,body:&quot;You don't need a full website to sell. A single clean page with your product, a short description, a price, and a Gumroad or Stan checkout link is enough. Launch ugly, iterate fast.&quot;,quiz:{q:&quot;What do you need minimum to start selling?&quot;,opts:[&quot;A full website&quot;,&quot;A social media presence&quot;,&quot;One page with product + checkout link&quot;,&quot;A team&quot;],ans:2}},
+  ]},
+];
+
+function CourseTool({onBack}) {
+  const [done,setDone]=useState({});
+  const [active,setActive]=useState(null);
+  const [quizAns,setQuizAns]=useState(null);
+  const [quizChecked,setQuizChecked]=useState(false);
+  const [cert,setCert]=useState(false);
+  const allLessons=MODULES_DATA.flatMap(m=&gt;m.lessons);
+  const doneCount=Object.values(done).filter(Boolean).length;
+  const pct=Math.round((doneCount/allLessons.length)*100);
+  const allDone=doneCount===allLessons.length;
+
+  const openLesson=(l)=&gt;{ setActive(l); setQuizAns(null); setQuizChecked(false); };
+  const markDone=(id)=&gt;{ setDone(d=&gt;({...d,[id]:true})); setActive(null); };
+
+  if(cert) return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={()=&gt;setCert(false)}/&gt;
+      &lt;div style={cardStyle({textAlign:&quot;center&quot;,padding:&quot;48px 32px&quot;})}&gt;
+        &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.18em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:12})}&gt;back room studio&lt;/p&gt;
+        &lt;p style={sf({fontSize:14,color:M,marginBottom:4})}&gt;this certifies that&lt;/p&gt;
+        &lt;h2 style={{fontFamily:&quot;Georgia,serif&quot;,fontWeight:400,fontSize:28,color:A,margin:&quot;0 0 4px&quot;}}&gt;creator graduate&lt;/h2&gt;
+        &lt;p style={sf({fontSize:13,color:M,marginBottom:24})}&gt;has completed all 7 lessons of the back room creator foundations course&lt;/p&gt;
+        &lt;div style={{width:60,height:1,background:B,margin:&quot;0 auto 24px&quot;}}/&gt;
+        &lt;p style={sf({fontSize:12,color:M})}&gt;back room studio · {new Date().toLocaleDateString(&quot;en-US&quot;,{month:&quot;long&quot;,year:&quot;numeric&quot;})}&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+
+  if(active) return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={()=&gt;setActive(null)}/&gt;
+      &lt;div style={cardStyle()}&gt;
+        &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.1em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:6})}&gt;lesson&lt;/p&gt;
+        &lt;h2 style={{fontFamily:&quot;Georgia,serif&quot;,fontWeight:400,fontSize:22,color:A,margin:&quot;0 0 16px&quot;}}&gt;{active.title}&lt;/h2&gt;
+        &lt;p style={sf({fontSize:15,color:A,lineHeight:1.8,marginBottom:24})}&gt;{active.body}&lt;/p&gt;
+        &lt;div style={{background:BG,borderRadius:8,padding:&quot;18px 20px&quot;,marginBottom:20}}&gt;
+          &lt;p style={{margin:&quot;0 0 12px&quot;,fontSize:14,fontWeight:500,color:A,fontFamily:&quot;sans-serif&quot;}}&gt;{active.quiz.q}&lt;/p&gt;
+          {active.quiz.opts.map((o,i)=&gt;{
+            let bg=W, col=A;
+            if(quizChecked){ if(i===active.quiz.ans){bg=&quot;#e8f5e8&quot;;col=&quot;#2a6a2a&quot;;} else if(i===quizAns&amp;&amp;i!==active.quiz.ans){bg=&quot;#f5e8e8&quot;;col=&quot;#8a2a2a&quot;;} }
+            else if(i===quizAns){bg=&quot;#f0ece4&quot;;col=A;}
+            return &lt;div key={i} onClick={()=&gt;!quizChecked&amp;&amp;setQuizAns(i)} style={{padding:&quot;9px 14px&quot;,border:`0.5px solid ${quizChecked&amp;&amp;i===active.quiz.ans?&quot;#6a9a6a&quot;:B}`,borderRadius:6,marginBottom:6,cursor:quizChecked?&quot;default&quot;:&quot;pointer&quot;,background:bg,color:col,fontSize:13,fontFamily:&quot;sans-serif&quot;}}&gt;{o}&lt;/div&gt;;
+          })}
+          {!quizChecked&amp;&amp;quizAns!==null&amp;&amp;&lt;button style={btnStyle({background:A,color:W,marginTop:6})} onClick={()=&gt;setQuizChecked(true)}&gt;check answer&lt;/button&gt;}
+          {quizChecked&amp;&amp;&lt;p style={sf({fontSize:13,color:quizAns===active.quiz.ans?&quot;#2a6a2a&quot;:&quot;#8a2a2a&quot;,marginTop:8})}&gt;{quizAns===active.quiz.ans?&quot;correct ✓&quot;:&quot;not quite — the correct answer is highlighted&quot;}&lt;/p&gt;}
+        &lt;/div&gt;
+        {quizChecked&amp;&amp;quizAns===active.quiz.ans&amp;&amp;!done[active.id]&amp;&amp;&lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;markDone(active.id)}&gt;mark complete →&lt;/button&gt;}
+        {done[active.id]&amp;&amp;&lt;p style={sf({fontSize:13,color:&quot;#2a6a2a&quot;})}&gt;✓ completed&lt;/p&gt;}
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;course player&quot;/&gt;
+      &lt;div style={cardStyle({marginBottom:16})}&gt;
+        &lt;div style={{display:&quot;flex&quot;,justifyContent:&quot;space-between&quot;,marginBottom:8}}&gt;
+          &lt;span style={sf({fontSize:13,color:A})}&gt;progress&lt;/span&gt;
+          &lt;span style={sf({fontSize:13,fontWeight:500,color:A})}&gt;{doneCount}/{allLessons.length} lessons&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div style={{height:6,background:BG,borderRadius:3,overflow:&quot;hidden&quot;}}&gt;
+          &lt;div style={{height:&quot;100%&quot;,width:`${pct}%`,background:A,borderRadius:3,transition:&quot;width 0.3s&quot;}}/&gt;
+        &lt;/div&gt;
+        {allDone&amp;&amp;&lt;button style={btnStyle({background:A,color:W,marginTop:14})} onClick={()=&gt;setCert(true)}&gt;generate certificate →&lt;/button&gt;}
+      &lt;/div&gt;
+      {MODULES_DATA.map(mod=&gt;(
+        &lt;div key={mod.id} style={{marginBottom:20}}&gt;
+          &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.12em&quot;,textTransform:&quot;uppercase&quot;,color:M,margin:&quot;0 0 8px&quot;})}&gt;module {mod.id} — {mod.title}&lt;/p&gt;
+          {mod.lessons.map(l=&gt;(
+            &lt;div key={l.id} onClick={()=&gt;openLesson(l)} style={{...cardStyle({marginBottom:8,display:&quot;flex&quot;,alignItems:&quot;center&quot;,gap:12,cursor:&quot;pointer&quot;})}}&gt;
+              &lt;div style={{width:20,height:20,borderRadius:4,border:`0.5px solid ${done[l.id]?A:B}`,background:done[l.id]?A:&quot;transparent&quot;,display:&quot;flex&quot;,alignItems:&quot;center&quot;,justifyContent:&quot;center&quot;,flexShrink:0}}&gt;
+                {done[l.id]&amp;&amp;&lt;span style={{color:W,fontSize:11}}&gt;✓&lt;/span&gt;}
+              &lt;/div&gt;
+              &lt;p style={sf({margin:0,fontSize:14,color:done[l.id]?M:A,textDecoration:done[l.id]?&quot;line-through&quot;:&quot;none&quot;,flex:1})}&gt;{l.title}&lt;/p&gt;
+              &lt;span style={sf({fontSize:13,color:M})}&gt;›&lt;/span&gt;
+            &lt;/div&gt;
+          ))}
+        &lt;/div&gt;
+      ))}
+    &lt;/Wrap&gt;
+  );
+}
+
+// PRICING CALCULATOR
+function PricingTool({onBack}) {
+  const [cost,setCost]=useState(0);
+  const [hours,setHours]=useState(3);
+  const [tier,setTier]=useState(&quot;mid&quot;);
+  const [type,setType]=useState(&quot;template&quot;);
+  const mult={low:1.5,mid:2.5,premium:4.5}[tier];
+  const base=cost+(hours*25);
+  const suggested=Math.round(base*mult/5)*5||27;
+  const low=Math.round(suggested*0.7/5)*5;
+  const high=Math.round(suggested*1.4/5)*5;
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;pricing calculator&quot;/&gt;
+      &lt;div style={cardStyle()}&gt;
+        &lt;div style={{marginBottom:14}}&gt;&lt;Lbl t=&quot;product type&quot;/&gt;
+          &lt;select style={inpStyle()} value={type} onChange={e=&gt;setType(e.target.value)}&gt;
+            {[&quot;template&quot;,&quot;ebook&quot;,&quot;course&quot;,&quot;guide&quot;,&quot;bundle&quot;,&quot;coaching&quot;].map(t=&gt;&lt;option key={t}&gt;{t}&lt;/option&gt;)}
+          &lt;/select&gt;
+        &lt;/div&gt;
+        &lt;div style={{marginBottom:14}}&gt;&lt;Lbl t=&quot;production cost ($)&quot;/&gt;
+          &lt;input type=&quot;number&quot; style={inpStyle()} value={cost} onChange={e=&gt;setCost(parseFloat(e.target.value)||0)}/&gt;
+        &lt;/div&gt;
+        &lt;div style={{marginBottom:14}}&gt;
+          &lt;Lbl t={`hours to create: ${hours}`}/&gt;
+          &lt;input type=&quot;range&quot; min=&quot;0.5&quot; max=&quot;40&quot; step=&quot;0.5&quot; value={hours} onChange={e=&gt;setHours(parseFloat(e.target.value))} style={{width:&quot;100%&quot;}}/&gt;
+        &lt;/div&gt;
+        &lt;div style={{marginBottom:20}}&gt;
+          &lt;Lbl t=&quot;market positioning&quot;/&gt;
+          &lt;div style={{display:&quot;flex&quot;,gap:8}}&gt;
+            {[&quot;low&quot;,&quot;mid&quot;,&quot;premium&quot;].map(t=&gt;(
+              &lt;button key={t} onClick={()=&gt;setTier(t)} style={btnStyle({flex:1,border:`0.5px solid ${tier===t?A:B}`,background:tier===t?A:W,color:tier===t?W:M})}&gt;{t}&lt;/button&gt;
+            ))}
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div style={{background:BG,borderRadius:8,padding:&quot;20px&quot;,textAlign:&quot;center&quot;}}&gt;
+          &lt;p style={sf({fontSize:12,color:M,marginBottom:4})}&gt;suggested price&lt;/p&gt;
+          &lt;p style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:36,color:A,margin:&quot;0 0 8px&quot;,fontWeight:400}}&gt;${suggested}&lt;/p&gt;
+          &lt;p style={sf({fontSize:12,color:M})}&gt;range: ${low} – ${high}&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+}
+
+// ONBOARDING FORM BUILDER
+const DEF_FIELDS=[
+  {id:1,q:&quot;what's your business name?&quot;,type:&quot;text&quot;,req:true},
+  {id:2,q:&quot;what are your main goals for working together?&quot;,type:&quot;textarea&quot;,req:true},
+  {id:3,q:&quot;what's your timeline?&quot;,type:&quot;select&quot;,opts:[&quot;asap&quot;,&quot;1 month&quot;,&quot;2–3 months&quot;,&quot;flexible&quot;],req:false},
+  {id:4,q:&quot;what's your budget range?&quot;,type:&quot;select&quot;,opts:[&quot;under $500&quot;,&quot;$500–$1,000&quot;,&quot;$1,000–$3,000&quot;,&quot;$3,000+&quot;],req:false},
+];
+
+function OnboardTool({onBack}) {
+  const [fields,setFields]=useState(DEF_FIELDS);
+  const [newQ,setNewQ]=useState(&quot;&quot;);
+  const [newType,setNewType]=useState(&quot;text&quot;);
+  const [preview,setPreview]=useState(false);
+  const [answers,setAnswers]=useState({});
+  const [submitted,setSubmitted]=useState(false);
+  const [copied,setCopied]=useState(false);
+
+  const addField=()=&gt;{ if(!newQ.trim()) return; setFields([...fields,{id:Date.now(),q:newQ,type:newType,req:false}]); setNewQ(&quot;&quot;); };
+  const remove=(id)=&gt;setFields(fields.filter(f=&gt;f.id!==id));
+  const copyText=()=&gt;{ navigator.clipboard.writeText(fields.map((f,i)=&gt;`${i+1}. ${f.q}`).join(&quot;\n&quot;)); setCopied(true); setTimeout(()=&gt;setCopied(false),2000); };
+
+  if(preview) return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={()=&gt;{ setPreview(false); setSubmitted(false); }}/&gt;
+      &lt;SectionTitle t=&quot;form preview&quot;/&gt;
+      &lt;div style={cardStyle()}&gt;
+        {submitted ? (
+          &lt;div style={{textAlign:&quot;center&quot;,padding:&quot;24px 0&quot;}}&gt;
+            &lt;p style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:22,color:A,fontWeight:400,marginBottom:8}}&gt;thank you.&lt;/p&gt;
+            &lt;p style={sf({fontSize:14,color:M})}&gt;your responses have been received. we'll be in touch shortly.&lt;/p&gt;
+          &lt;/div&gt;
+        ) : (
+          &lt;&gt;
+            {fields.map(f=&gt;(
+              &lt;div key={f.id} style={{marginBottom:16}}&gt;
+                &lt;Lbl t={f.q+(f.req?&quot; *&quot;:&quot;&quot;)}/&gt;
+                {f.type===&quot;text&quot;&amp;&amp;&lt;input style={inpStyle()} value={answers[f.id]||&quot;&quot;} onChange={e=&gt;setAnswers({...answers,[f.id]:e.target.value})}/&gt;}
+                {f.type===&quot;textarea&quot;&amp;&amp;&lt;textarea style={inpStyle({minHeight:80,resize:&quot;vertical&quot;})} value={answers[f.id]||&quot;&quot;} onChange={e=&gt;setAnswers({...answers,[f.id]:e.target.value})}/&gt;}
+                {f.type===&quot;select&quot;&amp;&amp;&lt;select style={inpStyle()} value={answers[f.id]||&quot;&quot;} onChange={e=&gt;setAnswers({...answers,[f.id]:e.target.value})}&gt;{(f.opts||[]).map(o=&gt;&lt;option key={o}&gt;{o}&lt;/option&gt;)}&lt;/select&gt;}
+              &lt;/div&gt;
+            ))}
+            &lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;setSubmitted(true)}&gt;submit →&lt;/button&gt;
+          &lt;/&gt;
+        )}
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;client onboarding form builder&quot;/&gt;
+      &lt;div style={cardStyle({marginBottom:16})}&gt;
+        &lt;p style={sf({fontSize:13,color:M,marginBottom:14})}&gt;click × to remove a field&lt;/p&gt;
+        {fields.map((f,i)=&gt;(
+          &lt;div key={f.id} style={{display:&quot;flex&quot;,alignItems:&quot;center&quot;,gap:10,padding:&quot;10px 12px&quot;,background:BG,borderRadius:7,marginBottom:6}}&gt;
+            &lt;span style={sf({fontSize:12,color:M,minWidth:16})}&gt;{i+1}.&lt;/span&gt;
+            &lt;p style={sf({margin:0,fontSize:13,color:A,flex:1})}&gt;{f.q}&lt;/p&gt;
+            &lt;span style={sf({fontSize:10,color:M,background:B,padding:&quot;2px 7px&quot;,borderRadius:4})}&gt;{f.type}&lt;/span&gt;
+            &lt;button onClick={()=&gt;remove(f.id)} style={btnStyle({background:&quot;none&quot;,border:&quot;none&quot;,color:M,padding:&quot;2px 6px&quot;,fontSize:14})}&gt;×&lt;/button&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+      &lt;div style={cardStyle({marginBottom:16})}&gt;
+        &lt;p style={sf({fontSize:13,fontWeight:500,color:A,marginBottom:12})}&gt;add a question&lt;/p&gt;
+        &lt;div style={{display:&quot;flex&quot;,gap:8,marginBottom:8}}&gt;
+          &lt;input style={inpStyle()} value={newQ} onChange={e=&gt;setNewQ(e.target.value)} placeholder=&quot;your question...&quot;/&gt;
+          &lt;select style={inpStyle({width:120,flexShrink:0})} value={newType} onChange={e=&gt;setNewType(e.target.value)}&gt;
+            &lt;option value=&quot;text&quot;&gt;text&lt;/option&gt;
+            &lt;option value=&quot;textarea&quot;&gt;long text&lt;/option&gt;
+            &lt;option value=&quot;select&quot;&gt;dropdown&lt;/option&gt;
+          &lt;/select&gt;
+        &lt;/div&gt;
+        &lt;button style={btnStyle({background:A,color:W})} onClick={addField}&gt;add question&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div style={{display:&quot;flex&quot;,gap:8}}&gt;
+        &lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;setPreview(true)}&gt;preview form →&lt;/button&gt;
+        &lt;button style={btnStyle({border:`0.5px solid ${B}`,background:W,color:M})} onClick={copyText}&gt;{copied?&quot;copied ✓&quot;:&quot;copy questions&quot;}&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+}
+
+// CONTRACT GENERATOR
+function ContractTool({onBack}) {
+  const [f,setF]=useState({clientName:&quot;&quot;,clientEmail:&quot;&quot;,serviceName:&quot;brand design &amp; canva templates&quot;,scope:&quot;design of brand kit including logo, color palette, typography, and 5 Canva templates&quot;,deliverables:&quot;brand guide PDF, Canva template files, logo suite&quot;,timeline:&quot;4 weeks from project kickoff&quot;,payment:&quot;$1,200 paid in full before work begins&quot;,revisions:&quot;2 rounds of revisions included&quot;,provider:&quot;back room studio&quot;});
+  const [show,setShow]=useState(false);
+  const set=(k,v)=&gt;setF({...f,[k]:v});
+  const contract=`SERVICE AGREEMENT\n\nThis agreement is between ${f.provider} (&quot;Provider&quot;) and ${f.clientName||&quot;[Client Name]&quot;} (&quot;Client&quot;).\n\nSERVICE\n${f.serviceName}\n\nSCOPE OF WORK\n${f.scope}\n\nDELIVERABLES\n${f.deliverables}\n\nTIMELINE\n${f.timeline}\n\nPAYMENT\n${f.payment}\n\nREVISIONS\n${f.revisions}\n\nOWNERSHIP\nAll final deliverables become property of the Client upon receipt of full payment. Provider retains the right to display work in portfolio.\n\nCANCELLATION\nEither party may cancel with 7 days written notice. Work completed prior to cancellation is billable at the agreed rate.\n\nProvider: ${f.provider}\nClient: ${f.clientName||&quot;[Client Name]&quot;} · ${f.clientEmail||&quot;[Client Email]&quot;}\nDate: ${new Date().toLocaleDateString(&quot;en-US&quot;,{month:&quot;long&quot;,day:&quot;numeric&quot;,year:&quot;numeric&quot;})}`;
+
+  const fields=[[&quot;clientName&quot;,&quot;client name&quot;],[&quot;clientEmail&quot;,&quot;client email&quot;],[&quot;serviceName&quot;,&quot;service name&quot;],[&quot;scope&quot;,&quot;scope of work&quot;],[&quot;deliverables&quot;,&quot;deliverables&quot;],[&quot;timeline&quot;,&quot;timeline&quot;],[&quot;payment&quot;,&quot;payment terms&quot;],[&quot;revisions&quot;,&quot;revision policy&quot;],[&quot;provider&quot;,&quot;your business name&quot;]];
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;contract generator&quot;/&gt;
+      {!show ? (
+        &lt;div style={cardStyle()}&gt;
+          {fields.map(([k,lbl])=&gt;(
+            &lt;div key={k} style={{marginBottom:12}}&gt;
+              &lt;Lbl t={lbl}/&gt;
+              {[&quot;scope&quot;,&quot;deliverables&quot;].includes(k)
+                ? &lt;textarea style={inpStyle({minHeight:64,resize:&quot;vertical&quot;})} value={f[k]} onChange={e=&gt;set(k,e.target.value)}/&gt;
+                : &lt;input style={inpStyle()} value={f[k]} onChange={e=&gt;set(k,e.target.value)}/&gt;
+              }
+            &lt;/div&gt;
+          ))}
+          &lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;setShow(true)}&gt;generate contract →&lt;/button&gt;
+        &lt;/div&gt;
+      ) : (
+        &lt;&gt;
+          &lt;div style={cardStyle({marginBottom:14,fontFamily:&quot;Georgia,serif&quot;,fontSize:14,lineHeight:2,color:A,whiteSpace:&quot;pre-wrap&quot;})}&gt;{contract}&lt;/div&gt;
+          &lt;div style={{display:&quot;flex&quot;,gap:8}}&gt;
+            &lt;button style={btnStyle({border:`0.5px solid ${B}`,background:W,color:M})} onClick={()=&gt;setShow(false)}&gt;← edit&lt;/button&gt;
+            &lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;navigator.clipboard.writeText(contract)}&gt;copy contract&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/&gt;
+      )}
+    &lt;/Wrap&gt;
+  );
+}
+
+// PROPOSAL BUILDER
+function ProposalTool({onBack}) {
+  const [f,setF]=useState({clientName:&quot;&quot;,project:&quot;brand design&quot;,problem:&quot;you need a cohesive brand identity that attracts your ideal clients&quot;,solution:&quot;i'll create a complete visual brand system tailored to your audience and goals&quot;,includes:&quot;brand strategy session, logo suite, color palette, typography system, brand guide PDF, 5 Canva templates&quot;,timeline:&quot;4 weeks&quot;,investment:&quot;$1,200&quot;,cta:&quot;reply to this proposal to get started&quot;});
+  const [show,setShow]=useState(false);
+  const set=(k,v)=&gt;setF({...f,[k]:v});
+  const sections=[[&quot;the challenge&quot;,f.problem],[&quot;the solution&quot;,f.solution],[&quot;what's included&quot;,f.includes],[&quot;timeline&quot;,f.timeline],[&quot;investment&quot;,f.investment],[&quot;next step&quot;,f.cta]];
+  const fields=[[&quot;clientName&quot;,&quot;client name&quot;],[&quot;project&quot;,&quot;project type&quot;],[&quot;problem&quot;,&quot;the problem you're solving&quot;],[&quot;solution&quot;,&quot;your solution&quot;],[&quot;includes&quot;,&quot;what's included&quot;],[&quot;timeline&quot;,&quot;timeline&quot;],[&quot;investment&quot;,&quot;investment&quot;],[&quot;cta&quot;,&quot;call to action&quot;]];
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;proposal builder&quot;/&gt;
+      {!show ? (
+        &lt;div style={cardStyle()}&gt;
+          {fields.map(([k,lbl])=&gt;(
+            &lt;div key={k} style={{marginBottom:12}}&gt;
+              &lt;Lbl t={lbl}/&gt;
+              {[&quot;problem&quot;,&quot;solution&quot;,&quot;includes&quot;].includes(k)
+                ? &lt;textarea style={inpStyle({minHeight:64,resize:&quot;vertical&quot;})} value={f[k]} onChange={e=&gt;set(k,e.target.value)}/&gt;
+                : &lt;input style={inpStyle()} value={f[k]} onChange={e=&gt;set(k,e.target.value)}/&gt;
+              }
+            &lt;/div&gt;
+          ))}
+          &lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;setShow(true)}&gt;generate proposal →&lt;/button&gt;
+        &lt;/div&gt;
+      ) : (
+        &lt;&gt;
+          &lt;div style={cardStyle({marginBottom:14})}&gt;
+            &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.16em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:20})}&gt;back room studio · proposal&lt;/p&gt;
+            &lt;h2 style={{fontFamily:&quot;Georgia,serif&quot;,fontWeight:400,fontSize:22,color:A,marginBottom:6}}&gt;for {f.clientName||&quot;[client]&quot;}&lt;/h2&gt;
+            &lt;p style={sf({fontSize:13,color:M,marginBottom:24})}&gt;{f.project}&lt;/p&gt;
+            {sections.map(([h,v])=&gt;(
+              &lt;div key={h} style={{marginBottom:18,paddingBottom:18,borderBottom:`0.5px solid ${B}`}}&gt;
+                &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.1em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:4})}&gt;{h}&lt;/p&gt;
+                &lt;p style={sf({fontSize:14,color:A,lineHeight:1.6})}&gt;{v}&lt;/p&gt;
+              &lt;/div&gt;
+            ))}
+          &lt;/div&gt;
+          &lt;div style={{display:&quot;flex&quot;,gap:8}}&gt;
+            &lt;button style={btnStyle({border:`0.5px solid ${B}`,background:W,color:M})} onClick={()=&gt;setShow(false)}&gt;← edit&lt;/button&gt;
+            &lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;navigator.clipboard.writeText(sections.map(([h,v])=&gt;`${h.toUpperCase()}\n${v}`).join(&quot;\n\n&quot;))}&gt;copy proposal&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/&gt;
+      )}
+    &lt;/Wrap&gt;
+  );
+}
+
+// 30-DAY CALENDAR
+const CAL_TYPES=[&quot;value post&quot;,&quot;behind the scenes&quot;,&quot;product promo&quot;,&quot;community question&quot;,&quot;personal story&quot;,&quot;tip or tutorial&quot;,&quot;reshare/testimonial&quot;];
+const CAL_BG={&quot;value post&quot;:&quot;#e8f0f8&quot;,&quot;behind the scenes&quot;:&quot;#f5ede0&quot;,&quot;product promo&quot;:&quot;#ede0f5&quot;,&quot;community question&quot;:&quot;#e0f5ed&quot;,&quot;personal story&quot;:&quot;#f5e0e0&quot;,&quot;tip or tutorial&quot;:&quot;#f0f5e0&quot;,&quot;reshare/testimonial&quot;:&quot;#f5f0e0&quot;};
+
+function CalendarTool({onBack}) {
+  const [cal,setCal]=useState(()=&gt;Array.from({length:30},(_,i)=&gt;({day:i+1,type:CAL_TYPES[i%CAL_TYPES.length],note:&quot;&quot;})));
+  const [editDay,setEditDay]=useState(null);
+  const [noteVal,setNoteVal]=useState(&quot;&quot;);
+  const [typeVal,setTypeVal]=useState(&quot;&quot;);
+  const update=(day,key,val)=&gt;setCal(cal.map(d=&gt;d.day===day?{...d,[key]:val}:d));
+  const openEdit=(d)=&gt;{ setEditDay(d.day); setNoteVal(d.note); setTypeVal(d.type); };
+  const save=()=&gt;{ update(editDay,&quot;note&quot;,noteVal); update(editDay,&quot;type&quot;,typeVal); setEditDay(null); };
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;30-day content calendar&quot;/&gt;
+      &lt;p style={sf({fontSize:13,color:M,marginBottom:16})}&gt;click any day to edit the post type and add a note&lt;/p&gt;
+      &lt;div style={{display:&quot;grid&quot;,gridTemplateColumns:&quot;repeat(auto-fill,minmax(88px,1fr))&quot;,gap:6}}&gt;
+        {cal.map(d=&gt;(
+          &lt;div key={d.day} onClick={()=&gt;openEdit(d)} style={{background:CAL_BG[d.type]||&quot;#f5f5f0&quot;,borderRadius:8,padding:&quot;10px 8px&quot;,cursor:&quot;pointer&quot;,border:`0.5px solid ${B}`}}&gt;
+            &lt;p style={sf({fontSize:10,color:M,marginBottom:4})}&gt;day {d.day}&lt;/p&gt;
+            &lt;p style={sf({fontSize:11,color:A,lineHeight:1.3,margin:0})}&gt;{d.type}&lt;/p&gt;
+            {d.note&amp;&amp;&lt;p style={sf({fontSize:10,color:M,marginTop:4,lineHeight:1.3})}&gt;{d.note.slice(0,28)}{d.note.length&gt;28?&quot;...&quot;:&quot;&quot;}&lt;/p&gt;}
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+      {editDay&amp;&amp;(
+        &lt;div style={{position:&quot;fixed&quot;,inset:0,background:&quot;rgba(0,0,0,0.3)&quot;,display:&quot;flex&quot;,alignItems:&quot;center&quot;,justifyContent:&quot;center&quot;,zIndex:99}}&gt;
+          &lt;div style={cardStyle({width:320,maxWidth:&quot;90vw&quot;})}&gt;
+            &lt;p style={sf({fontSize:13,fontWeight:500,color:A,marginBottom:12})}&gt;day {editDay}&lt;/p&gt;
+            &lt;Lbl t=&quot;post type&quot;/&gt;
+            &lt;select style={inpStyle({marginBottom:12})} value={typeVal} onChange={e=&gt;setTypeVal(e.target.value)}&gt;
+              {CAL_TYPES.map(t=&gt;&lt;option key={t}&gt;{t}&lt;/option&gt;)}
+            &lt;/select&gt;
+            &lt;Lbl t=&quot;note or idea&quot;/&gt;
+            &lt;textarea style={inpStyle({minHeight:70,resize:&quot;vertical&quot;,marginBottom:14})} value={noteVal} onChange={e=&gt;setNoteVal(e.target.value)} placeholder=&quot;what will this post be about?&quot;/&gt;
+            &lt;div style={{display:&quot;flex&quot;,gap:8}}&gt;
+              &lt;button style={btnStyle({background:A,color:W})} onClick={save}&gt;save&lt;/button&gt;
+              &lt;button style={btnStyle({border:`0.5px solid ${B}`,background:W,color:M})} onClick={()=&gt;setEditDay(null)}&gt;cancel&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/Wrap&gt;
+  );
+}
+
+// AI CAPTION WRITER
+function CaptionTool({onBack}) {
+  const [input,setInput]=useState(&quot;&quot;);
+  const [tone,setTone]=useState(&quot;editorial&quot;);
+  const [platform,setPlatform]=useState(&quot;instagram&quot;);
+  const [result,setResult]=useState(&quot;&quot;);
+  const [loading,setLoading]=useState(false);
+
+  const generate=async()=&gt;{
+    if(!input.trim()) return;
+    setLoading(true); setResult(&quot;&quot;);
+    try {
+      const res=await fetch(&quot;https://api.anthropic.com/v1/messages&quot;,{method:&quot;POST&quot;,headers:{&quot;Content-Type&quot;:&quot;application/json&quot;},body:JSON.stringify({model:&quot;claude-sonnet-4-20250514&quot;,max_tokens:1000,messages:[{role:&quot;user&quot;,content:`Write a ${platform} caption for a digital product creator. Tone: ${tone}, lowercase, intentional. Topic: ${input}. No hashtags unless platform is instagram. Just the caption, nothing else.`}]})});
+      const data=await res.json();
+      setResult(data.content?.find(b=&gt;b.type===&quot;text&quot;)?.text||&quot;&quot;);
+    } catch { setResult(&quot;couldn't generate — try again&quot;); }
+    setLoading(false);
+  };
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;ai caption writer&quot;/&gt;
+      &lt;div style={cardStyle()}&gt;
+        &lt;div style={{display:&quot;flex&quot;,gap:8,marginBottom:14,flexWrap:&quot;wrap&quot;}}&gt;
+          &lt;div style={{flex:1,minWidth:140}}&gt;&lt;Lbl t=&quot;platform&quot;/&gt;
+            &lt;select style={inpStyle()} value={platform} onChange={e=&gt;setPlatform(e.target.value)}&gt;
+              {[&quot;instagram&quot;,&quot;twitter/x&quot;,&quot;linkedin&quot;,&quot;email subject&quot;,&quot;pinterest&quot;].map(p=&gt;&lt;option key={p}&gt;{p}&lt;/option&gt;)}
+            &lt;/select&gt;
+          &lt;/div&gt;
+          &lt;div style={{flex:1,minWidth:140}}&gt;&lt;Lbl t=&quot;tone&quot;/&gt;
+            &lt;select style={inpStyle()} value={tone} onChange={e=&gt;setTone(e.target.value)}&gt;
+              {[&quot;editorial&quot;,&quot;warm&quot;,&quot;bold&quot;,&quot;minimal&quot;,&quot;conversational&quot;].map(t=&gt;&lt;option key={t}&gt;{t}&lt;/option&gt;)}
+            &lt;/select&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;Lbl t=&quot;what's the post about?&quot;/&gt;
+        &lt;textarea style={inpStyle({minHeight:70,resize:&quot;vertical&quot;,marginBottom:14})} value={input} onChange={e=&gt;setInput(e.target.value)} placeholder=&quot;e.g. launching a $37 canva template bundle...&quot;/&gt;
+        &lt;button style={btnStyle({background:A,color:W})} onClick={generate}&gt;{loading?&quot;writing...&quot;:&quot;generate caption ↗&quot;}&lt;/button&gt;
+        {result&amp;&amp;&lt;div style={{marginTop:16,background:BG,borderRadius:8,padding:&quot;14px 16px&quot;}}&gt;&lt;p style={{margin:0,fontSize:15,fontFamily:&quot;Georgia,serif&quot;,fontStyle:&quot;italic&quot;,color:A,lineHeight:1.8}}&gt;{result}&lt;/p&gt;&lt;/div&gt;}
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+}
+
+// BRAND KIT GENERATOR
+const FONTS=[&quot;Georgia, serif&quot;,&quot;Garamond, serif&quot;,&quot;Palatino, serif&quot;,&quot;Helvetica, sans-serif&quot;,&quot;Futura, sans-serif&quot;,&quot;Gill Sans, sans-serif&quot;];
+
+function BrandKitTool({onBack}) {
+  const [f,setF]=useState({name:&quot;back room studio&quot;,tagline:&quot;tools for intentional creators&quot;,primary:&quot;#1a1a1a&quot;,secondary:&quot;#f0ece4&quot;,accent:&quot;#8a6a4a&quot;,font1:&quot;Georgia, serif&quot;,font2:&quot;Helvetica, sans-serif&quot;});
+  const set=(k,v)=&gt;setF({...f,[k]:v});
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;brand kit generator&quot;/&gt;
+      &lt;div style={{display:&quot;grid&quot;,gridTemplateColumns:&quot;1fr 1fr&quot;,gap:16}}&gt;
+        &lt;div style={cardStyle()}&gt;
+          &lt;p style={sf({fontSize:13,fontWeight:500,color:A,marginBottom:14})}&gt;brand details&lt;/p&gt;
+          {[[&quot;name&quot;,&quot;brand name&quot;],[&quot;tagline&quot;,&quot;tagline&quot;]].map(([k,l])=&gt;(
+            &lt;div key={k} style={{marginBottom:10}}&gt;&lt;Lbl t={l}/&gt;&lt;input style={inpStyle()} value={f[k]} onChange={e=&gt;set(k,e.target.value)}/&gt;&lt;/div&gt;
+          ))}
+          &lt;div style={{marginBottom:10}}&gt;&lt;Lbl t=&quot;headline font&quot;/&gt;
+            &lt;select style={inpStyle()} value={f.font1} onChange={e=&gt;set(&quot;font1&quot;,e.target.value)}&gt;{FONTS.map(fn=&gt;&lt;option key={fn}&gt;{fn}&lt;/option&gt;)}&lt;/select&gt;
+          &lt;/div&gt;
+          &lt;div style={{marginBottom:14}}&gt;&lt;Lbl t=&quot;body font&quot;/&gt;
+            &lt;select style={inpStyle()} value={f.font2} onChange={e=&gt;set(&quot;font2&quot;,e.target.value)}&gt;{FONTS.map(fn=&gt;&lt;option key={fn}&gt;{fn}&lt;/option&gt;)}&lt;/select&gt;
+          &lt;/div&gt;
+          &lt;div style={{display:&quot;flex&quot;,gap:12,flexWrap:&quot;wrap&quot;}}&gt;
+            {[[&quot;primary&quot;,&quot;primary&quot;],[&quot;secondary&quot;,&quot;secondary&quot;],[&quot;accent&quot;,&quot;accent&quot;]].map(([k,l])=&gt;(
+              &lt;div key={k}&gt;&lt;Lbl t={l}/&gt;
+                &lt;input type=&quot;color&quot; value={f[k]} onChange={e=&gt;set(k,e.target.value)} style={{width:44,height:36,border:`0.5px solid ${B}`,borderRadius:6,cursor:&quot;pointer&quot;,padding:2,display:&quot;block&quot;}}/&gt;
+              &lt;/div&gt;
+            ))}
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div style={{display:&quot;flex&quot;,flexDirection:&quot;column&quot;,gap:12}}&gt;
+          &lt;div style={cardStyle({background:f.secondary,flex:&quot;none&quot;})}&gt;
+            &lt;p style={{fontFamily:f.font1,fontSize:20,color:f.primary,margin:&quot;0 0 4px&quot;,fontWeight:400}}&gt;{f.name||&quot;brand name&quot;}&lt;/p&gt;
+            &lt;p style={{fontFamily:f.font2,fontSize:12,color:f.primary+&quot;99&quot;,margin:0}}&gt;{f.tagline||&quot;your tagline&quot;}&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div style={cardStyle({background:f.primary})}&gt;
+            &lt;p style={{fontFamily:f.font2,fontSize:10,letterSpacing:&quot;0.14em&quot;,textTransform:&quot;uppercase&quot;,color:f.secondary,margin:&quot;0 0 8px&quot;}}&gt;palette&lt;/p&gt;
+            &lt;div style={{display:&quot;flex&quot;,gap:8}}&gt;
+              {[f.primary,f.secondary,f.accent].map((c,i)=&gt;(
+                &lt;div key={i} style={{flex:1,height:32,borderRadius:5,background:c,border:`0.5px solid rgba(255,255,255,0.2)`}}/&gt;
+              ))}
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div style={cardStyle()}&gt;
+            &lt;p style={{fontFamily:f.font2,fontSize:10,letterSpacing:&quot;0.12em&quot;,textTransform:&quot;uppercase&quot;,color:M,margin:&quot;0 0 10px&quot;}}&gt;typography&lt;/p&gt;
+            &lt;p style={{fontFamily:f.font1,fontSize:18,color:A,margin:&quot;0 0 4px&quot;,fontWeight:400}}&gt;headline font&lt;/p&gt;
+            &lt;p style={{fontFamily:f.font2,fontSize:13,color:M,margin:0}}&gt;body font — clean and readable&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div style={cardStyle({background:f.accent,textAlign:&quot;center&quot;})}&gt;
+            &lt;p style={{fontFamily:f.font2,fontSize:11,color:f.secondary,margin:&quot;0 0 8px&quot;,letterSpacing:&quot;0.08em&quot;}}&gt;accent&lt;/p&gt;
+            &lt;button style={{fontFamily:f.font2,fontSize:13,background:f.secondary,color:f.primary,border:&quot;none&quot;,borderRadius:6,padding:&quot;8px 20px&quot;,cursor:&quot;pointer&quot;}}&gt;{f.name||&quot;your brand&quot;}&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+}
+
+// STOREFRONT
+function StorefrontTool({onBack}) {
+  const [products,setProducts]=useState([
+    {id:1,name:&quot;the $37 bundle&quot;,price:37,desc:&quot;one-page canva site + analytics guide&quot;,link:&quot;#&quot;,badge:&quot;best seller&quot;},
+    {id:2,name:&quot;ig template pack&quot;,price:27,desc:&quot;minimal editorial canva templates&quot;,link:&quot;#&quot;,badge:&quot;&quot;},
+  ]);
+  const [form,setForm]=useState({name:&quot;&quot;,price:&quot;&quot;,desc:&quot;&quot;,link:&quot;&quot;,badge:&quot;&quot;});
+  const [adding,setAdding]=useState(false);
+  const add=()=&gt;{ if(!form.name||!form.price) return; setProducts([...products,{id:Date.now(),...form,price:parseFloat(form.price)}]); setForm({name:&quot;&quot;,price:&quot;&quot;,desc:&quot;&quot;,link:&quot;&quot;,badge:&quot;&quot;}); setAdding(false); };
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;digital storefront&quot;/&gt;
+      &lt;div style={cardStyle({marginBottom:16,textAlign:&quot;center&quot;,padding:&quot;32px 24px&quot;})}&gt;
+        &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.18em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:6})}&gt;back room studio&lt;/p&gt;
+        &lt;h2 style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:22,fontWeight:400,color:A,marginBottom:4}}&gt;digital products&lt;/h2&gt;
+        &lt;p style={sf({fontSize:13,color:M})}&gt;templates, guides &amp; tools for creators&lt;/p&gt;
+      &lt;/div&gt;
+      {products.map(p=&gt;(
+        &lt;div key={p.id} style={cardStyle({marginBottom:10,display:&quot;flex&quot;,justifyContent:&quot;space-between&quot;,alignItems:&quot;center&quot;,flexWrap:&quot;wrap&quot;,gap:12})}&gt;
+          &lt;div&gt;
+            &lt;div style={{display:&quot;flex&quot;,gap:8,alignItems:&quot;center&quot;,marginBottom:4}}&gt;
+              &lt;p style={sf({margin:0,fontSize:15,color:A,fontWeight:500})}&gt;{p.name}&lt;/p&gt;
+              {p.badge&amp;&amp;&lt;span style={{fontSize:10,fontFamily:&quot;sans-serif&quot;,background:&quot;#f0ece4&quot;,color:&quot;#7a6e5e&quot;,padding:&quot;2px 8px&quot;,borderRadius:4}}&gt;{p.badge}&lt;/span&gt;}
+            &lt;/div&gt;
+            &lt;p style={sf({margin:0,fontSize:13,color:M})}&gt;{p.desc}&lt;/p&gt;
+          &lt;/div&gt;
+          &lt;div style={{display:&quot;flex&quot;,alignItems:&quot;center&quot;,gap:10}}&gt;
+            &lt;span style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:18,color:A}}&gt;${p.price}&lt;/span&gt;
+            &lt;a href={p.link||&quot;#&quot;} style={{fontSize:13,fontFamily:&quot;sans-serif&quot;,background:A,color:W,padding:&quot;7px 16px&quot;,borderRadius:6,textDecoration:&quot;none&quot;}}&gt;get it →&lt;/a&gt;
+            &lt;button onClick={()=&gt;setProducts(products.filter(x=&gt;x.id!==p.id))} style={btnStyle({background:&quot;none&quot;,border:&quot;none&quot;,color:M,padding:&quot;4px 8px&quot;,fontSize:16})}&gt;×&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      ))}
+      {adding ? (
+        &lt;div style={cardStyle({marginTop:12})}&gt;
+          {[[&quot;name&quot;,&quot;product name&quot;],[&quot;price&quot;,&quot;price&quot;],[&quot;desc&quot;,&quot;description&quot;],[&quot;link&quot;,&quot;checkout link&quot;],[&quot;badge&quot;,&quot;badge (optional)&quot;]].map(([k,l])=&gt;(
+            &lt;div key={k} style={{marginBottom:8}}&gt;&lt;Lbl t={l}/&gt;&lt;input style={inpStyle()} value={form[k]} onChange={e=&gt;setForm({...form,[k]:e.target.value})}/&gt;&lt;/div&gt;
+          ))}
+          &lt;div style={{display:&quot;flex&quot;,gap:8,marginTop:4}}&gt;
+            &lt;button style={btnStyle({background:A,color:W})} onClick={add}&gt;add&lt;/button&gt;
+            &lt;button style={btnStyle({border:`0.5px solid ${B}`,background:W,color:M})} onClick={()=&gt;setAdding(false)}&gt;cancel&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      ) : (
+        &lt;button style={btnStyle({border:`0.5px solid ${B}`,background:W,color:M,marginTop:8})} onClick={()=&gt;setAdding(true)}&gt;+ add product&lt;/button&gt;
+      )}
+    &lt;/Wrap&gt;
+  );
+}
+
+// CHECKOUT PAGE BUILDER
+function CheckoutTool({onBack}) {
+  const [f,setF]=useState({product:&quot;the $37 bundle&quot;,price:&quot;37&quot;,desc:&quot;one-page canva site template + google analytics setup guide&quot;,bullet1:&quot;minimal, editorial canva template&quot;,bullet2:&quot;step-by-step analytics setup&quot;,bullet3:&quot;instant digital download&quot;,cta:&quot;get instant access&quot;,guarantee:&quot;30-day money back guarantee&quot;,bg:&quot;#faf9f7&quot;,btnColor:&quot;#1a1a1a&quot;});
+  const set=(k,v)=&gt;setF({...f,[k]:v});
+  const [preview,setPreview]=useState(false);
+  const [done,setDone]=useState(false);
+
+  if(preview) return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={()=&gt;{ setPreview(false); setDone(false); }}/&gt;
+      &lt;div style={{background:f.bg,borderRadius:12,overflow:&quot;hidden&quot;,border:`0.5px solid ${B}`}}&gt;
+        &lt;div style={{padding:&quot;36px 32px&quot;,textAlign:&quot;center&quot;}}&gt;
+          {done ? (
+            &lt;div style={{padding:&quot;32px 0&quot;}}&gt;
+              &lt;p style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:24,color:A,fontWeight:400,marginBottom:8}}&gt;you're in.&lt;/p&gt;
+              &lt;p style={sf({fontSize:14,color:M})}&gt;check your email for your download link.&lt;/p&gt;
+            &lt;/div&gt;
+          ) : (
+            &lt;&gt;
+              &lt;h2 style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:24,color:A,fontWeight:400,margin:&quot;0 0 8px&quot;}}&gt;{f.product}&lt;/h2&gt;
+              &lt;p style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:32,color:A,margin:&quot;0 0 16px&quot;,fontWeight:400}}&gt;${f.price}&lt;/p&gt;
+              &lt;p style={sf({fontSize:14,color:M,maxWidth:400,margin:&quot;0 auto 20px&quot;,lineHeight:1.6})}&gt;{f.desc}&lt;/p&gt;
+              &lt;ul style={{listStyle:&quot;none&quot;,padding:0,margin:&quot;0 auto 24px&quot;,maxWidth:320,textAlign:&quot;left&quot;}}&gt;
+                {[f.bullet1,f.bullet2,f.bullet3].filter(Boolean).map((b,i)=&gt;(
+                  &lt;li key={i} style={sf({fontSize:13,color:A,marginBottom:6,paddingLeft:20,position:&quot;relative&quot;})}&gt;
+                    &lt;span style={{position:&quot;absolute&quot;,left:0}}&gt;✓&lt;/span&gt;{b}
+                  &lt;/li&gt;
+                ))}
+              &lt;/ul&gt;
+              &lt;button onClick={()=&gt;setDone(true)} style={{background:f.btnColor,color:W,border:&quot;none&quot;,borderRadius:8,padding:&quot;13px 32px&quot;,fontSize:15,cursor:&quot;pointer&quot;,fontFamily:&quot;sans-serif&quot;,marginBottom:10,display:&quot;block&quot;,width:&quot;100%&quot;,maxWidth:300,margin:&quot;0 auto 10px&quot;}}&gt;{f.cta}&lt;/button&gt;
+              {f.guarantee&amp;&amp;&lt;p style={sf({fontSize:12,color:M,marginTop:10})}&gt;{f.guarantee}&lt;/p&gt;}
+            &lt;/&gt;
+          )}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;checkout page builder&quot;/&gt;
+      &lt;div style={cardStyle()}&gt;
+        {[[&quot;product&quot;,&quot;product name&quot;],[&quot;price&quot;,&quot;price ($)&quot;],[&quot;desc&quot;,&quot;description&quot;],[&quot;bullet1&quot;,&quot;benefit 1&quot;],[&quot;bullet2&quot;,&quot;benefit 2&quot;],[&quot;bullet3&quot;,&quot;benefit 3&quot;],[&quot;cta&quot;,&quot;button text&quot;],[&quot;guarantee&quot;,&quot;guarantee text (optional)&quot;]].map(([k,l])=&gt;(
+          &lt;div key={k} style={{marginBottom:10}}&gt;&lt;Lbl t={l}/&gt;&lt;input style={inpStyle()} value={f[k]} onChange={e=&gt;set(k,e.target.value)}/&gt;&lt;/div&gt;
+        ))}
+        &lt;div style={{display:&quot;flex&quot;,gap:12,marginBottom:16,flexWrap:&quot;wrap&quot;}}&gt;
+          &lt;div&gt;&lt;Lbl t=&quot;background color&quot;/&gt;&lt;input type=&quot;color&quot; value={f.bg} onChange={e=&gt;set(&quot;bg&quot;,e.target.value)} style={{width:44,height:36,border:`0.5px solid ${B}`,borderRadius:6,cursor:&quot;pointer&quot;,padding:2,display:&quot;block&quot;}}/&gt;&lt;/div&gt;
+          &lt;div&gt;&lt;Lbl t=&quot;button color&quot;/&gt;&lt;input type=&quot;color&quot; value={f.btnColor} onChange={e=&gt;set(&quot;btnColor&quot;,e.target.value)} style={{width:44,height:36,border:`0.5px solid ${B}`,borderRadius:6,cursor:&quot;pointer&quot;,padding:2,display:&quot;block&quot;}}/&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;setPreview(true)}&gt;preview checkout →&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+}
+
+// SALES PAGE BUILDER
+function SalesPageTool({onBack}) {
+  const [f,setF]=useState({headline:&quot;stop building in the dark.&quot;,subheadline:&quot;the back room creator toolkit gives you every tool you need to launch, sell, and grow — without the guesswork.&quot;,price:&quot;37&quot;,problem:&quot;you're spending hours on tasks that should take minutes. you're googling how to price, what to post, and how to write a bio that converts.&quot;,solution:&quot;one toolkit. every tool you actually need as a digital creator.&quot;,bullets:&quot;canva site template ready in minutes\ngoogle analytics setup in under an hour\n30-day content plan built for product sellers&quot;,testimonial:&quot;this saved me so much time. everything i needed was right there.&quot;,testimonialName:&quot;maya r., template creator&quot;,cta:&quot;get the bundle for $37&quot;,bg:&quot;#faf9f7&quot;,accent:&quot;#1a1a1a&quot;});
+  const set=(k,v)=&gt;setF({...f,[k]:v});
+  const [preview,setPreview]=useState(false);
+
+  if(preview) return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={()=&gt;setPreview(false)}/&gt;
+      &lt;div style={{background:f.bg,borderRadius:12,overflow:&quot;hidden&quot;,border:`0.5px solid ${B}`}}&gt;
+        &lt;div style={{background:f.accent,padding:&quot;48px 32px&quot;,textAlign:&quot;center&quot;}}&gt;
+          &lt;h1 style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:28,fontWeight:400,color:W,margin:&quot;0 0 14px&quot;,lineHeight:1.2}}&gt;{f.headline}&lt;/h1&gt;
+          &lt;p style={sf({fontSize:15,color:&quot;rgba(255,255,255,0.7)&quot;,maxWidth:480,margin:&quot;0 auto&quot;,lineHeight:1.7})}&gt;{f.subheadline}&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div style={{padding:&quot;36px 32px&quot;}}&gt;
+          {[[&quot;the problem&quot;,f.problem],[&quot;the solution&quot;,f.solution]].map(([h,v])=&gt;(
+            &lt;div key={h} style={{marginBottom:28}}&gt;
+              &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.12em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:8})}&gt;{h}&lt;/p&gt;
+              &lt;p style={sf({fontSize:15,color:A,lineHeight:1.7})}&gt;{v}&lt;/p&gt;
+            &lt;/div&gt;
+          ))}
+          &lt;div style={{marginBottom:28}}&gt;
+            &lt;p style={sf({fontSize:11,letterSpacing:&quot;0.12em&quot;,textTransform:&quot;uppercase&quot;,color:M,marginBottom:10})}&gt;what's inside&lt;/p&gt;
+            {f.bullets.split(&quot;\n&quot;).filter(Boolean).map((b,i)=&gt;(
+              &lt;div key={i} style={{display:&quot;flex&quot;,gap:10,marginBottom:8,alignItems:&quot;flex-start&quot;}}&gt;
+                &lt;span style={{color:f.accent,fontWeight:500,flexShrink:0,fontFamily:&quot;sans-serif&quot;}}&gt;✓&lt;/span&gt;
+                &lt;p style={sf({margin:0,fontSize:14,color:A})}&gt;{b}&lt;/p&gt;
+              &lt;/div&gt;
+            ))}
+          &lt;/div&gt;
+          {f.testimonial&amp;&amp;(
+            &lt;div style={{background:f.accent+&quot;18&quot;,borderLeft:`3px solid ${f.accent}`,padding:&quot;16px 20px&quot;,marginBottom:28,borderRadius:&quot;0 8px 8px 0&quot;}}&gt;
+              &lt;p style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:15,fontStyle:&quot;italic&quot;,color:A,margin:&quot;0 0 6px&quot;}}&gt;&quot;{f.testimonial}&quot;&lt;/p&gt;
+              &lt;p style={sf({fontSize:12,color:M,margin:0})}&gt;{f.testimonialName}&lt;/p&gt;
+            &lt;/div&gt;
+          )}
+          &lt;div style={{textAlign:&quot;center&quot;,paddingTop:8}}&gt;
+            &lt;p style={{fontFamily:&quot;Georgia,serif&quot;,fontSize:28,color:A,margin:&quot;0 0 14px&quot;,fontWeight:400}}&gt;${f.price}&lt;/p&gt;
+            &lt;button style={{background:f.accent,color:W,border:&quot;none&quot;,borderRadius:8,padding:&quot;14px 36px&quot;,fontSize:16,cursor:&quot;pointer&quot;,fontFamily:&quot;sans-serif&quot;}}&gt;{f.cta}&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+
+  return (
+    &lt;Wrap&gt;
+      &lt;Back onBack={onBack}/&gt;
+      &lt;SectionTitle t=&quot;sales page builder&quot;/&gt;
+      &lt;div style={cardStyle()}&gt;
+        {[[&quot;headline&quot;,&quot;main headline&quot;],[&quot;subheadline&quot;,&quot;subheadline&quot;],[&quot;price&quot;,&quot;price ($)&quot;],[&quot;problem&quot;,&quot;the problem&quot;],[&quot;solution&quot;,&quot;your solution&quot;],[&quot;bullets&quot;,&quot;what's inside (one per line)&quot;],[&quot;testimonial&quot;,&quot;testimonial quote&quot;],[&quot;testimonialName&quot;,&quot;testimonial name&quot;],[&quot;cta&quot;,&quot;button text&quot;]].map(([k,l])=&gt;(
+          &lt;div key={k} style={{marginBottom:10}}&gt;
+            &lt;Lbl t={l}/&gt;
+            {[&quot;problem&quot;,&quot;solution&quot;,&quot;bullets&quot;,&quot;testimonial&quot;].includes(k)
+              ? &lt;textarea style={inpStyle({minHeight:70,resize:&quot;vertical&quot;})} value={f[k]} onChange={e=&gt;set(k,e.target.value)}/&gt;
+              : &lt;input style={inpStyle()} value={f[k]} onChange={e=&gt;set(k,e.target.value)}/&gt;
+            }
+          &lt;/div&gt;
+        ))}
+        &lt;div style={{display:&quot;flex&quot;,gap:12,marginBottom:16}}&gt;
+          &lt;div&gt;&lt;Lbl t=&quot;page bg&quot;/&gt;&lt;input type=&quot;color&quot; value={f.bg} onChange={e=&gt;set(&quot;bg&quot;,e.target.value)} style={{width:44,height:36,border:`0.5px solid ${B}`,borderRadius:6,cursor:&quot;pointer&quot;,padding:2,display:&quot;block&quot;}}/&gt;&lt;/div&gt;
+          &lt;div&gt;&lt;Lbl t=&quot;accent&quot;/&gt;&lt;input type=&quot;color&quot; value={f.accent} onChange={e=&gt;set(&quot;accent&quot;,e.target.value)} style={{width:44,height:36,border:`0.5px solid ${B}`,borderRadius:6,cursor:&quot;pointer&quot;,padding:2,display:&quot;block&quot;}}/&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;button style={btnStyle({background:A,color:W})} onClick={()=&gt;setPreview(true)}&gt;preview sales page →&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/Wrap&gt;
+  );
+}
+
+// ROOT
+const TOOL_MAP={courses:CourseTool,pricing:PricingTool,onboard:OnboardTool,contract:ContractTool,proposal:ProposalTool,calendar:CalendarTool,caption:CaptionTool,brandkit:BrandKitTool,storefront:StorefrontTool,checkout:CheckoutTool,salespage:SalesPageTool};
+
+export default function App() {
+  const [user,setUser]=useState(null);
+  const [active,setActive]=useState(null);
+  if(!user) return &lt;Entry onEnter={(name,email)=&gt;setUser({name,email})}/&gt;;
+  if(active){ const Tool=TOOL_MAP[active]; return &lt;Tool onBack={()=&gt;setActive(null)}/&gt;; }
+  return &lt;Dashboard user={user} onSelect={setActive}/&gt;;
+}</pre>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"37e2f64f1d3b4eb790bb0f8150ba12dd","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
