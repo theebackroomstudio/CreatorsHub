@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Creator Hub OS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-alt: #0b1020;
+      --card: #111827;
+      --accent: #f97316;
+      --accent-soft: rgba(249,115,22,0.12);
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --border: #1f2933;
+      --radius: 10px;
+      --shadow: 0 18px 45px rgba(0,0,0,0.55);
+      --font: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background: radial-gradient(circle at top, #111827 0, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 1120px;
+      background: linear-gradient(145deg, #020617 0, #020617 40%, #0b1020 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(148,163,184,0.18);
+      box-shadow: var(--shadow);
+      padding: 24px 24px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shell::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0 0, rgba(249,115,22,0.18), transparent 55%),
+        radial-gradient(circle at 100% 0, rgba(59,130,246,0.16), transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0, #f97316, #7c2d12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: #020617;
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.8), 0 12px 30px rgba(0,0,0,0.7);
+    }
+
+    .brand-meta h1 {
+      font-size: 18px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .brand-meta p {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+      padding: 6px 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15,23,42,0.7);
+      backdrop-filter: blur(10px);
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34,197,94,0.25);
+    }
+
+    .hero {
+      margin-bottom: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.4fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 800px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    .hero-main {
+      padding: 16px 18px 18px;
+      border-radius: 18px;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.9), #020617);
+      border: 1px solid rgba(148,163,184,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0 0, rgba(249,115,22,0.12), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .hero-main-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .hero-title {
+      font-size: 24px;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .hero-title span {
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 420px;
+      margin-bottom: 12px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .hero-chip {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 6px 10px;
+      font-size: 11px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15,23,42,0.85);
+    }
+
+    .hero-chip span {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(249,115,22,0.9);
+    }
+
+    .hero-side {
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: radial-gradient(circle at top, #020617, #020617 40%, #020617 100%);
+      padding: 14px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .hero-side-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+
+    .hero-side-card {
+      border-radius: 14px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.25);
+      padding: 10px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hero-side-card h3 {
+      font-size: 13px;
+    }
+
+    .hero-side-card p {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .hero-side-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.35);
+      color: var(--muted);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(148,163,184,0.25);
+      padding-bottom: 4px;
+      overflow-x: auto;
+    }
+
+    .nav-tab {
+      font-size: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-tab span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.7);
+    }
+
+    .nav-tab.active {
+      color: var(--text);
+      border-color: rgba(249,115,22,0.7);
+      background: radial-gradient(circle at top left, rgba(249,115,22,0.16), rgba(15,23,42,0.95));
+    }
+
+    .nav-tab.active span.dot {
+      background: var(--accent);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.3fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      border-radius: 16px;
+      background: rgba(15,23,42,0.92);
+      border: 1px solid rgba(148,163,184,0.25);
+      padding: 12px 13px 14px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+
+    .panel-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .pill-soft {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.35);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-soft span {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(249,115,22,0.9);
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .accordion-item {
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.3);
+      background: rgba(15,23,42,0.9);
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      padding: 8px 9px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .accordion-header span.label {
+      color: var(--text);
+    }
+
+    .accordion-header span.meta {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .accordion-header button {
+      border: none;
+      background: rgba(15,23,42,0.9);
+      color: var(--muted);
+      border-radius: 999px;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.22s ease;
+      border-top: 1px solid rgba(15,23,42,0.9);
+      background: rgba(15,23,42,0.96);
+    }
+
+    .accordion-body-inner {
+      padding: 8px 9px 9px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.35);
+      color: var(--muted);
+    }
+
+    .copy-block {
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,0.35);
+      background: rgba(15,23,42,0.9);
+      padding: 7px 8px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .copy-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .copy-text {
+      font-size: 12px;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .copy-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .btn-copy {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.9);
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-copy.copied {
+      border-color: rgba(34,197,94,0.8);
+      color: #bbf7d0;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 700px) {
+      .grid-two {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(31,41,55,0.9);
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 10px;
+    }
+
+    .metric-value {
+      color: var(--text);
+    }
+
+    footer {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    footer span strong {
+      color: var(--accent);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand-block">
+        <div class="brand-logo">CH</div>
+        <div class="brand-meta">
+          <h1>Creator Hub OS</h1>
+          <p>Central command center for your content, brand, and growth.</p>
+        </div>
+      </div>
+      <div>
+        <div class="pill">
+          <span class="pill-dot"></span>
+          Live workspace · Built for creators
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-main">
+        <div class="hero-main-inner">
+          <div class="hero-kicker">Start here</div>
+          <div class="hero-title">
+            Your <span>all‑in‑one</span> creator operating system.
+          </div>
+          <p class="hero-sub">
+            Plan, script, publish, and review your content from one interactive hub. Customize this
+            for each client’s brand, niche, and workflow.
+          </p>
+          <div class="hero-grid">
+            <div class="hero-chip"><span></span> Content engine</div>
+            <div class="hero-chip"><span></span> Brand HQ</div>
+            <div class="hero-chip"><span></span> Growth dashboard</div>
+          </div>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <div>
+          <div class="hero-side-title">Today’s focus</div>
+          <div class="hero-side-card">
+            <h3>Ship one piece of content.</h3>
+            <p>Pick a platform, grab a prompt, and publish something imperfect but live.</p>
+            <div class="hero-side-tags">
+              <span class="tag">Record 1 short</span>
+              <span class="tag">Post 1 carousel</span>
+              <span class="tag">Send 1 email</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="hero-side-title">Workflow status</div>
+          <div class="hero-side-card">
+            <p>Use this hub daily as your “home base” instead of scattered docs and apps.</p>
+            <div class="hero-side-tags">
+              <span class="tag">Plan</span>
+              <span class="tag">Create</span>
+              <span class="tag">Repurpose</span>
+              <span class="tag">Review</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-target="dashboard">
+        <span class="dot"></span> Dashboard
+      </button>
+      <button class="nav-tab" data-target="content">
+        <span class="dot"></span> Content system
+      </button>
+      <button class="nav-tab" data-target="brand">
+        <span class="dot"></span> Brand hub
+      </button>
+      <button class="nav-tab" data-target="assets">
+        <span class="dot"></span> Scripts & assets
+      </button>
+      <button class="nav-tab" data-target="analytics">
+        <span class="dot"></span> Analytics & review
+      </button>
+    </nav>
+
+    <main class="layout">
+      <!-- LEFT COLUMN -->
+      <div>
+        <!-- DASHBOARD -->
+        <section class="section active" id="dashboard">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Weekly command center</div>
+                <div class="panel-sub">
+                  Map your week at a glance. Replace these with the client’s real platforms.
+                </div>
+              </div>
+              <div class="pill-soft">
+                <span></span> Week of: <span id="week-label">This week</span>
+              </div>
+            </div>
+
+            <div class="grid-two">
+              <div class="copy-block">
+                <div class="copy-label">Publishing checklist</div>
+                <div class="copy-text" data-copy>
+- 3x short‑form videos
+- 2x long‑form pieces
+- 2x email touchpoints
+- 3x story updates
+                </div>
+                <div class="copy-actions">
+                  <button class="btn-copy">Copy checklist</button>
+                </div>
+              </div>
+              <div class="copy-block">
+                <div class="copy-label">Weekly intention</div>
+                <div class="copy-text" data-copy>
+This week I am focused on consistency over perfection. Every day gets one small, shippable piece of content.
+                </div>
+                <div class="copy-actions">
+                  <button class="btn-copy">Copy intention</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion" style="margin-top:10px;">
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Daily rhythm</span>
+                    <span class="meta">Simple loop you can actually stick to.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <ol style="padding-left:16px;">
+                      <li>Brain dump 5–10 ideas (hooks, stories, questions).</li>
+                      <li>Pick 1 idea and turn it into a short script or outline.</li>
+                      <li>Record or write for 20–30 minutes max.</li>
+                      <li>Post it, even if it’s imperfect.</li>
+                      <li>Log it in the analytics section below.</li>
+                    </ol>
+                    <div class="badge-row">
+                      <span class="badge">Momentum over polish</span>
+                      <span class="badge">One piece per day</span>
+                      <span class="badge">Track, don’t judge</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Platforms in play</span>
+                    <span class="meta">Customize per creator: TikTok, IG, YouTube, podcast, email, etc.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <div class="badge-row">
+                      <span class="badge">TikTok · 1–2 posts/day</span>
+                      <span class="badge">Instagram Reels · 1/day</span>
+                      <span class="badge">YouTube · 1 long‑form/week</span>
+                      <span class="badge">Email · 1–2/week</span>
+                    </div>
+                    <p style="margin-top:4px;">
+                      Swap these for the client’s real platforms and cadence. This becomes their “default rhythm.”
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONTENT SYSTEM -->
+        <section class="section" id="content">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Content system</div>
+                <div class="panel-sub">
+                  Turn ideas into a repeatable pipeline: ideas → scripts → posts → repurposed assets.
+                </div>
+              </div>
+              <div class="pill-soft">
+                <span></span> Idea → Ship in 24h
+              </div>
+            </div>
+
+            <div class="accordion">
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Content pillars</span>
+                    <span class="meta">Core themes you return to again and again.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <ul style="padding-left:16px;">
+                      <li>Education: teach your audience how to solve a specific problem.</li>
+                      <li>Authority: show proof, case studies, behind‑the‑scenes.</li>
+                      <li>Belief‑shifting: challenge assumptions and reframe how they see the problem.</li>
+                      <li>Personal: stories, origin, values, “why I care.”</li>
+                    </ul>
+                    <p style="margin-top:4px;">
+                      Replace these with 3–5 pillars tailored to the creator’s niche and offer.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Hook prompts</span>
+                    <span class="meta">Use these to start any short‑form piece.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <div class="copy-block">
+                      <div class="copy-label">Short‑form hook bank</div>
+                      <div class="copy-text" data-copy>
+- “You’re doing [X] wrong, here’s why…”
+- “If you’re [identity], you need to hear this…”
+- “Nobody is talking about this part of [topic]…”
+- “I wish I knew this before I started [journey]…”
+- “Here’s the real reason your [result] isn’t improving…”
+                      </div>
+                      <div class="copy-actions">
+                        <button class="btn-copy">Copy hooks</button>
+                      </div>
+                    </div>
+                    <p>
+                      Swap these with AI‑generated hooks specific to the client’s audience and offer.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Repurposing workflow</span>
+                    <span class="meta">One long‑form → many assets.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <ol style="padding-left:16px;">
+                      <li>Record 1 long‑form video or podcast.</li>
+                      <li>Pull 5–10 key moments or quotes.</li>
+                      <li>Turn each into:
+                        <ul style="padding-left:16px; margin-top:4px;">
+                          <li>1 short‑form video</li>
+                          <li>1 carousel or static post</li>
+                          <li>1 email or community post</li>
+                        </ul>
+                      </li>
+                      <li>Schedule across the week instead of posting all at once.</li>
+                    </ol>
+                    <div class="badge-row">
+                      <span class="badge">One source, many outputs</span>
+                      <span class="badge">Batch once/week</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- BRAND HUB -->
+        <section class="section" id="brand">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Brand hub</div>
+                <div class="panel-sub">
+                  Keep voice, visuals, and audience clarity in one place so every piece feels on‑brand.
+                </div>
+              </div>
+              <div class="pill-soft">
+                <span></span> Brand clarity = faster content
+              </div>
+            </div>
+
+            <div class="accordion">
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Audience snapshot</span>
+                    <span class="meta">Who you’re really talking to.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <div class="copy-block">
+                      <div class="copy-label">Ideal audience profile</div>
+                      <div class="copy-text" data-copy>
+They are [age range], [identity/role], struggling with [core problem]. They want [core desire] without having to [thing they hate]. They care about [values] and are tired of [frustration].
+                      </div>
+                      <div class="copy-actions">
+                        <button class="btn-copy">Copy audience prompt</button>
+                      </div>
+                    </div>
+                    <p>
+                      Fill this in with specifics for each client so every piece of content speaks directly to that person.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Voice & tone</span>
+                    <span class="meta">How this creator sounds in every post.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <div class="grid-two">
+                      <div class="copy-block">
+                        <div class="copy-label">Voice rules</div>
+                        <div class="copy-text" data-copy>
+- Speak like you’re talking to one close friend.
+- Use simple, concrete language.
+- Be direct, but never condescending.
+- Share opinions, not just information.
+                        </div>
+                        <div class="copy-actions">
+                          <button class="btn-copy">Copy voice rules</button>
+                        </div>
+                      </div>
+                      <div class="copy-block">
+                        <div class="copy-label">Things to avoid</div>
+                        <div class="copy-text" data-copy>
+- Over‑explaining basic concepts.
+- Corporate or stiff language.
+- Generic “value” with no point of view.
+- Clickbait that doesn’t deliver.
+                        </div>
+                        <div class="copy-actions">
+                          <button class="btn-copy">Copy avoid list</button>
+                        </div>
+                      </div>
+                    </div>
+                    <p style="margin-top:4px;">
+                      Swap these with rules that match the creator’s personality and brand.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ASSETS -->
+        <section class="section" id="assets">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Scripts & assets</div>
+                <div class="panel-sub">
+                  Keep your go‑to scripts, intros, outros, and outreach messages in one place.
+                </div>
+              </div>
+              <div class="pill-soft">
+                <span></span> Reuse, refine, repeat
+              </div>
+            </div>
+
+            <div class="accordion">
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Short‑form script template</span>
+                    <span class="meta">Use for Reels, TikTok, Shorts.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <div class="copy-block">
+                      <div class="copy-label">Script skeleton</div>
+                      <div class="copy-text" data-copy>
+[HOOK – 1 sentence that calls out the problem or desire]
+
+[SETUP – 1–2 sentences: “Here’s what’s really going on…”]
+
+[BODY – 3 quick points, each with 1 line of explanation]
+
+[CTA – “Save this for later”, “Follow for more [topic]”, or “Comment [WORD] for the guide.”]
+                      </div>
+                      <div class="copy-actions">
+                        <button class="btn-copy">Copy script template</button>
+                      </div>
+                    </div>
+                    <p>
+                      Customize this per client and per platform. You can also have AI generate 10 variations.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="accordion-item">
+                <div class="accordion-header">
+                  <div>
+                    <span class="label">Collab / guest outreach</span>
+                    <span class="meta">DM or email template.</span>
+                  </div>
+                  <button aria-label="Toggle section">+</button>
+                </div>
+                <div class="accordion-body">
+                  <div class="accordion-body-inner">
+                    <div class="copy-block">
+                      <div class="copy-label">Outreach message</div>
+                      <div class="copy-text" data-copy>
+Hey [Name] — I’ve been loving your content on [topic]. I host [show/channel] where I bring on [who] to talk about [what]. I’d love to have you on for a short, focused conversation about [specific angle]. If you’re open to it, I can send over a few topic ideas and times. Either way, keep doing what you’re doing — it’s genuinely helpful.
+                      </div>
+                      <div class="copy-actions">
+                        <button class="btn-copy">Copy outreach</button>
+                      </div>
+                    </div>
+                    <p>
+                      Swap this with a tone that matches the creator and their platform (DM vs email).
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section class="section" id="analytics">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Analytics & review</div>
+                <div class="panel-sub">
+                  Track what’s working so you can double down instead of guessing.
+                </div>
+              </div>
+              <div class="pill-soft">
+                <span></span> Data, not vibes
+              </div>
+            </div>
+
+            <div class="grid-two">
+              <div class="copy-block">
+                <div class="copy-label">Simple tracking fields</div>
+                <div class="copy-text" data-copy>
+For each post, log:
+- Date
+- Platform
+- Format (short, long, carousel, email)
+- Topic / hook
+- Saves, shares, comments after 48h
+- Notes: why you think it did or didn’t land
+                </div>
+                <div class="copy-actions">
+                  <button class="btn-copy">Copy tracking fields</button>
+                </div>
+              </div>
+              <div class="copy-block">
+                <div class="copy-label">Weekly review prompts</div>
+                <div class="copy-text" data-copy>
+- Which 3 posts performed best? Why?
+- Which topics or hooks keep showing up in top posts?
+- What did I enjoy creating the most?
+- What will I do more of next week?
+                </div>
+                <div class="copy-actions">
+                  <button class="btn-copy">Copy review prompts</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:10px;">
+              <div class="metric-row">
+                <div>
+                  <div class="metric-label">Current focus metric</div>
+                  <div class="metric-value">Saves & shares per post</div>
+                </div>
+                <div>
+                  <div class="metric-label">Timeframe</div>
+                  <div class="metric-value">Next 30 days</div>
+                </div>
+              </div>
+              <div class="metric-row">
+                <div>
+                  <div class="metric-label">Baseline</div>
+                  <div class="metric-value">Fill in with current average</div>
+                </div>
+                <div>
+                  <div class="metric-label">Target</div>
+                  <div class="metric-value">+25–50% vs baseline</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <aside>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">How to use this hub</div>
+              <div class="panel-sub">
+                Treat this like your “home screen” for content. Open it before you open social apps.
+              </div>
+            </div>
+          </div>
+          <ol style="font-size:12px; color:var(--muted); padding-left:16px; display:flex; flex-direction:column; gap:4px;">
+            <li>Customize the text for your brand, niche, and platforms.</li>
+            <li>Bookmark this page in your browser as “Creator Hub”.</li>
+            <li>Each morning, visit Dashboard → pick one action → ship it.</li>
+            <li>Log performance in Analytics once per week.</li>
+            <li>Iterate pillars, hooks, and scripts based on what works.</li>
+          </ol>
+        </div>
+
+        <div class="panel" style="margin-top:10px;">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">For the builder (you)</div>
+              <div class="panel-sub">
+                Notes for you when delivering this as a one‑off service.
+              </div>
+            </div>
+          </div>
+          <ul style="font-size:12px; color:var(--muted); padding-left:16px; display:flex; flex-direction:column; gap:4px;">
+            <li>Use AI to rewrite every section in the client’s voice.</li>
+            <li>Swap generic bullets with niche‑specific examples.</li>
+            <li>Add their logo, colors, and links to their platforms.</li>
+            <li>Export as a single <code>index.html</code> and host on GitHub Pages or Vercel.</li>
+            <li>Record a 3–5 minute Loom walkthrough as a premium touch.</li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <span>Creator Hub OS · <strong>Custom build for: [Client Name]</strong></span>
+      <span>Update this hub anytime and redeploy.</span>
+    </footer>
+  </div>
+
+  <script>
+    // Tab switching
+    const tabs = document.querySelectorAll(".nav-tab");
+    const sections = document.querySelectorAll(".section");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const target = tab.getAttribute("data-target");
+        tabs.forEach(t => t.classList.remove("active"));
+        sections.forEach(s => s.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(target).classList.add("active");
+      });
+    });
+
+    // Accordion
+    document.querySelectorAll(".accordion-item").forEach(item => {
+      const header = item.querySelector(".accordion-header");
+      const body = item.querySelector(".accordion-body");
+      const btn = header.querySelector("button");
+
+      header.addEventListener("click", () => {
+        const isOpen = body.style.maxHeight && body.style.maxHeight !== "0px";
+        document.querySelectorAll(".accordion-body").forEach(b => {
+          b.style.maxHeight = null;
+        });
+        document.querySelectorAll(".accordion-header button").forEach(b => {
+          b.textContent = "+";
+        });
+        if (!isOpen) {
+          body.style.maxHeight = body.scrollHeight + "px";
+          btn.textContent = "–";
+        }
+      });
+    });
+
+    // Copy buttons
+    document.querySelectorAll(".btn-copy").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const block = btn.closest(".copy-block");
+        const textEl = block.querySelector("[data-copy]");
+        const text = textEl.innerText.trim();
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add("copied");
+          btn.textContent = "Copied";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.textContent = "Copy";
+          }, 1400);
+        });
+      });
+    });
+
+    // Optional: set week label to current week range
+    (function setWeekLabel() {
+      const label = document.getElementById("week-label");
+      if (!label) return;
+      const now = new Date();
+      const day = now.getDay();
+      const diffToMonday = (day + 6) % 7;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - diffToMonday);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+
+      const fmt = d =>
+        d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+
+      label.textContent = fmt(monday) + " – " + fmt(sunday);
+    })();
+  </script>
+</body>
+</html>
